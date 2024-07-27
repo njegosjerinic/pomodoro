@@ -1,0 +1,87 @@
+body{
+    background-color: indianred;
+}
+
+.pomodoro-layout{
+    width: 60%;
+    margin: auto;
+}
+
+header{
+    color: white;
+    display: flex;
+    justify-content: space-between;
+}
+
+header h1{
+    margin: 0;
+}
+
+.tajmer-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#countdownDisplay{
+    font-size:100px ;
+    color: white;
+    margin: 100px auto;
+}
+
+.pomodorosCounter{
+    display: flex;
+    height: 100px;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.task-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+}
+
+ul{
+    list-style-type: none;
+}
+
+.settings-screen{
+    z-index: 100;
+    position: absolute;
+    display: none;
+    height: 600px;
+    width: 400px;
+    left: 0; 
+    right: 0; 
+    margin-left: auto; 
+    margin-right: auto; 
+    background: white;
+    border-radius: 5%;
+    padding: 10px;
+}
+
+.settings-screen p {
+    color: gray;
+}
+
+
+.input-box{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+@media screen and (max-width:720px) {
+    .pomodoro-layout{
+        width: 100%;
+    }
+
+    .settings-screen{
+        width: 350px;
+        
+    }
+}
