@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Pomodoro</title>
+</head>
+<body>
+    <div class="settings-screen">
+        <header>
+            <p>settings</p>
+            <button id="exit-settings">exit</button>
+        </header>
+        <div class="input-box">
+            <p>Input minutes work</p>
+            <input type="number" id="timeInput">
+        </div>
+        <div class="input-box">
+            <p>Input minutes rest</p>
+            <input type="number" id="timeRestInput">
+        </div>
+    </div>
+    <div class="pomodoro-layout">
+        <header>
+            <h1>POMODORO TIMER</h1>
+            <button id="settings">settings</button>
+        </header>
+        <div class="tajmer-container">
+            <div id="countdownDisplay">00:00</div>
+            <div class="controllTime">
+                <button id="timeBtnStart">Start</button>
+                <button id="timeBtnPause">Pause</button>
+                <button id="timeBtnFF">>|</button>
+            </div>
+        </div>
+        <div class="pomodorosCounter" id="pomodorosCounter"></div>
+    </div>
+</body>
+<script src="app.js"></script>
+</html>
