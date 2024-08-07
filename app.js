@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded',function(){
     const exitSettingsButton = document.getElementById('exit-settings');
     const settingsScreen = document.getElementsByClassName("settings-screen")[0];
     const body = document.getElementsByTagName('BODY')[0];
+    const taskInput = document.getElementById('taskInput');
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    const taskList = document.getElementById('taskList');
     let countdown;
     let timeRemaning;
     let restCountdown;
@@ -81,6 +84,8 @@ document.addEventListener('DOMContentLoaded',function(){
             resting()
             updateDisplay(getInputRestDuration())
             pomodosCounter++;
+            pomodorosCounter.innerHTML = `#${pomodosCounter}`;
+            timeBtnStart.style.removeProperty('display');
         }
     },1000);
     }
@@ -108,6 +113,7 @@ document.addEventListener('DOMContentLoaded',function(){
             clearInterval(restCountdown);
             updateDisplay(getInputDuration())
             body.style.backgroundColor = 'indianred';
+            timeBtnStart.style.removeProperty('display');
         }
     },1000);
    }
@@ -181,7 +187,6 @@ document.addEventListener('DOMContentLoaded',function(){
 
     function resting(){
         body.style.backgroundColor = 'green';
-        timeBtnStart.style.removeProperty('display');
 
     }
 
@@ -206,5 +211,30 @@ document.addEventListener('DOMContentLoaded',function(){
         timeBtnPause.innerText = "Pause";
         body.style.backgroundColor = 'black'
     }
+
+    addTaskBtn.addEventListener('click', function() {
+        const taskText = taskInput.value.trim();  // Getting the input value and trimming whitespace
+        if (taskText !== '') {
+            const taskItem = document.createElement('li');
+            taskItem.innerHTML = `<input type="checkbox">${taskText} <button>Del</button>`;
+            taskList.appendChild(taskItem);
+            taskInput.value = '';  // Clearing the input field
+
+            taskItem.addEventListener('click', function() {
+                taskItem.classList.toggle('completed');
+            });
+
+            const deleteBtn = taskItem.querySelector('button');
+            deleteBtn.addEventListener('click', function() {
+                taskList.removeChild(taskItem);
+            });
+        }
+    });
+
+    taskInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            addTaskBtn.click();
+        }
+    });
 
 });
