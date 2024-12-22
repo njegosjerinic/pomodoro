@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const settingsScreen = document.getElementsByClassName("settings-screen")[0];
     const body = document.getElementsByTagName('BODY')[0];
     const taskInput = document.getElementById('taskInput');
+    const amountOfPomodorosInput = document.getElementById('amountOfPomodorosInput')
     const addTaskBtn = document.getElementById('addTaskBtn');
     const taskList = document.getElementById('taskList');
     let countdown;
@@ -86,13 +87,11 @@ document.addEventListener('DOMContentLoaded',function(){
             pomodosCounter++;
             pomodorosCounter.innerHTML = `#${pomodosCounter}`;
             timeBtnStart.style.removeProperty('display');
+            timeBtnFF.style.display = 'none';
+            timeBtnPause.style.display = 'none';
         }
     },1000);
     }
-
-    console.log(pomodosCounter)
-    //Number of pomodoros done 
-    pomodorosCounter.innerText = `#${pomodosCounter}`;
 
    //Making timer for rest interval
    function restTimer(restDuration){
@@ -114,6 +113,8 @@ document.addEventListener('DOMContentLoaded',function(){
             updateDisplay(getInputDuration())
             body.style.backgroundColor = 'indianred';
             timeBtnStart.style.removeProperty('display');
+            timeBtnFF.style.display = 'none';
+            timeBtnPause.style.display = 'none';
         }
     },1000);
    }
@@ -147,6 +148,9 @@ document.addEventListener('DOMContentLoaded',function(){
     timeBtnStart.addEventListener('click',function(){
         const duration = getInputDuration();
         const restDuration = getInputRestDuration();
+        timeBtnStart.style.display = 'none';
+        timeBtnFF.style.display = 'block';
+        timeBtnPause.style.display = 'block';
         if(isResting){
             clearInterval(restCountdown);
             workTimer(duration);
@@ -167,6 +171,9 @@ document.addEventListener('DOMContentLoaded',function(){
     timeBtnFF.addEventListener('click',function(){
         const duration = getInputDuration();
         const restDuration = getInputRestDuration();
+        timeBtnStart.style.removeProperty('display');
+        timeBtnFF.style.display = 'none';
+        timeBtnPause.style.display = 'none';
         if(isWorking){
             clearInterval(countdown);
             updateDisplay(restDuration);
@@ -182,7 +189,6 @@ document.addEventListener('DOMContentLoaded',function(){
 
     function working(){
         body.style.backgroundColor = 'black';
-        timeBtnStart.style.display = 'none';
     }
 
     function resting(){
@@ -209,25 +215,32 @@ document.addEventListener('DOMContentLoaded',function(){
     function resumeCountdown(){
         isPaused = false;
         timeBtnPause.innerText = "Pause";
-        body.style.backgroundColor = 'black'
+        body.style.backgroundColor = 'black';
     }
+
+
 
     addTaskBtn.addEventListener('click', function() {
         const taskText = taskInput.value.trim();  // Getting the input value and trimming whitespace
-        if (taskText !== '') {
+        const pomodorosNeeded = amountOfPomodorosInput.value;
+        if (taskText !== '' && pomodorosNeeded !== '' && pomodorosNeeded > 0 ) {
             const taskItem = document.createElement('li');
-            taskItem.innerHTML = `<input type="checkbox">${taskText} <button>Del</button>`;
+            taskItem.innerHTML = `<div id="addedTask" class = "Task"><div><input type="checkbox"><p>${taskText}</p></div><div><div id="pomodosDone"></div><p>/${pomodorosNeeded}</p> <button>Del</button></div><div>`;
             taskList.appendChild(taskItem);
             taskInput.value = '';  // Clearing the input field
+            amountOfPomodorosInput.value = '';
+            
 
             taskItem.addEventListener('click', function() {
-                taskItem.classList.toggle('completed');
+                taskItem.classList.toggle('active');
             });
 
             const deleteBtn = taskItem.querySelector('button');
             deleteBtn.addEventListener('click', function() {
                 taskList.removeChild(taskItem);
             });
+
+            
         }
     });
 
@@ -236,5 +249,6 @@ document.addEventListener('DOMContentLoaded',function(){
             addTaskBtn.click();
         }
     });
+    //Number of pomodoros done 
 
 });

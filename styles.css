@@ -3,7 +3,7 @@ body{
 }
 
 .pomodoro-layout{
-    width: 60%;
+    width: 40%;
     margin: auto;
 }
 
@@ -30,6 +30,18 @@ header h1{
     margin: 100px auto;
 }
 
+.controllTime{
+    display: flex;
+}
+
+#timeBtnPause{
+    display: none;
+}
+
+#timeBtnFF{
+    display: none;
+}
+
 .pomodorosCounter{
     display: flex;
     height: 100px;
@@ -47,6 +59,47 @@ header h1{
 
 ul{
     list-style-type: none;
+    width: 100%;
+    padding: 0;
+}
+
+li{
+    height: 100px;
+    width: 100%;
+    background: white;
+    color: black;
+}
+
+.active{
+    border-left: 5px solid black;
+}
+
+li:hover{
+    background: lightgray;
+    transition: 0.3s;
+}
+
+.Task{
+    display:flex;
+}
+
+.Task div p{
+    margin: 20px;
+}
+
+.Task div:nth-child(1){
+    display: flex;
+    justify-content: flex-start;
+    width: 49%;
+    height: 100px;
+    align-items: center;
+}
+
+.Task div:nth-child(2){
+    display: flex;
+    justify-content: flex-end;
+    width: 49%;
+    align-items: center;
 }
 
 .settings-screen{
