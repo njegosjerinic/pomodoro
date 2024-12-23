@@ -168,16 +168,18 @@ document.addEventListener('DOMContentLoaded',function(){
 
     timeBtnStart.addEventListener('click',function(){
         let duration = getInputDuration();
-        if(duration > 0){
+        let restDuration = getInputRestDuration();
+        if(duration > 0 && restDuration > 0){
             startWorkCountdown();
-            pomodosCounter++;
+            if(isWorking){
+                pomodosCounter++;
+            }
             pomodorosCounter.innerHTML = "#" + pomodosCounter;
         }else{
             timeBtnStart.disabled = true;
             location.reload();
         }
     });
-
 
     timeBtnFF.addEventListener('click',function(){
         const duration = getInputDuration();
