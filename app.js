@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded',function(){
     let timeRemaning;
     let restCountdown;
     let isPaused = false;
-    let pomodosCounter = 1;
+    let pomodosCounter = 0;
     let isWorking = true;
     let isResting = true;
     let restTimeRemaning;
@@ -126,7 +126,28 @@ document.addEventListener('DOMContentLoaded',function(){
     function formatTime(seconds){
         const minutes = Math.floor(seconds / 60);
         const secs = seconds % 60;
-        return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        return `${minutes < 10 ? '0' : ''}${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    function startWorkCountdown(){
+        const duration = getInputDuration();
+        const restDuration = getInputRestDuration();
+        timeBtnStart.style.display = 'none';
+        timeBtnFF.style.display = 'block';
+        timeBtnPause.style.display = 'block';
+        if(isResting && duration !== 0){
+            clearInterval(restCountdown);
+            workTimer(duration);
+            updateDisplay(duration);
+            working();
+            isResting = false; 
+        }else if(!isResting){
+            clearInterval(countdown);
+            restTimer(restDuration);
+            updateDisplay(restDuration);
+            resting();
+            isResting = true;
+        }
     }
 
 
@@ -146,25 +167,15 @@ document.addEventListener('DOMContentLoaded',function(){
     });
 
     timeBtnStart.addEventListener('click',function(){
-        const duration = getInputDuration();
-        const restDuration = getInputRestDuration();
-        timeBtnStart.style.display = 'none';
-        timeBtnFF.style.display = 'block';
-        timeBtnPause.style.display = 'block';
-        if(isResting){
-            clearInterval(restCountdown);
-            workTimer(duration);
-            updateDisplay(duration);
-            working();
-            isResting = false;
-        }else if(!isResting){
-            clearInterval(countdown);
-            restTimer(restDuration);
-            updateDisplay(restDuration);
-            resting();
-            isResting = true;
+        let duration = getInputDuration();
+        if(duration > 0){
+            startWorkCountdown();
+            pomodosCounter++;
+            pomodorosCounter.innerHTML = "#" + pomodosCounter;
+        }else{
+            timeBtnStart.disabled = true;
+            location.reload();
         }
-        console.log(isResting)
     });
 
 
