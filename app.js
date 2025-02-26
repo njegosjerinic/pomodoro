@@ -173,6 +173,7 @@ document.addEventListener('DOMContentLoaded',function(){
             startWorkCountdown();
             if(isWorking){
                 pomodosCounter++;
+                IncreaseCounter();
             }
             pomodorosCounter.innerHTML = "#" + pomodosCounter;
             
@@ -188,7 +189,6 @@ document.addEventListener('DOMContentLoaded',function(){
         timeBtnStart.style.removeProperty('display');
         timeBtnFF.style.display = 'none';
         timeBtnPause.style.display = 'none';
-        console.log(pomodosCounter);
         if(isWorking){
             clearInterval(countdown);
             updateDisplay(restDuration);
@@ -234,10 +234,6 @@ document.addEventListener('DOMContentLoaded',function(){
         body.style.backgroundColor = 'black';
     }
 
-    //Number of pomodoros done per task 
-
-    
-
     //task addition code 
 
     addTaskBtn.addEventListener('click', function() {
@@ -245,14 +241,24 @@ document.addEventListener('DOMContentLoaded',function(){
         const pomodorosNeeded = amountOfPomodorosInput.value;
         if (taskText !== '' && pomodorosNeeded !== '' && pomodorosNeeded > 0 ) {
             const taskItem = document.createElement('li');
-            taskItem.innerHTML = `<div id="addedTask" class = "Task"><div><input type="checkbox"><p>${taskText}</p></div><div><p data-counter="0">/${pomodorosNeeded}</p> <button>Del</button></div><div>`;
+            taskItem.innerHTML = `<div id="addedTask" class = "Task">
+                                    <div>
+                                        <input type="checkbox">
+                                            <p>${taskText}</p>
+                                    </div>
+                                    <div>
+                                        <p class="counterDisplay" data-counter="0">${pomodosCounter}/${pomodorosNeeded}</p> 
+                                        <button>Del</button>
+                                    </div>
+                                 </div>`;
+
             taskList.appendChild(taskItem);
             taskInput.value = '';  // Clearing the input field
             amountOfPomodorosInput.value = '';
             
 
             taskItem.addEventListener('click', function() {
-                taskItem.classList.toggle('active');
+                    taskItem.classList.toggle('active');
             });
 
             const deleteBtn = taskItem.querySelector('button');
@@ -263,6 +269,17 @@ document.addEventListener('DOMContentLoaded',function(){
             
         }
     });
+
+    //Number of pomodoros done per task 
+
+    function IncreaseCounter(){
+        let counterDisplay = document.querySelector('counterDisplay');
+        let currentCount = parseInt(counterDisplay.dataset.counter, 10);
+
+        currentCount++;
+        counterDisplay.dataset.counter = currentCount;
+        counterDisplay.textContent =`${currentCount}/${pomodorosNeeded}`;
+    }
 
     taskInput.addEventListener('keypress', function(event) {
         if (event.key === 'Enter') {
