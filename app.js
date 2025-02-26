@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded',function(){
     const settingsScreen = document.getElementsByClassName("settings-screen")[0];
     const body = document.getElementsByTagName('BODY')[0];
     const taskInput = document.getElementById('taskInput');
-    const amountOfPomodorosInput = document.getElementById('amountOfPomodorosInput')
+    const amountOfPomodorosInput = document.getElementById('amountOfPomodorosInput');
     const addTaskBtn = document.getElementById('addTaskBtn');
     const taskList = document.getElementById('taskList');
     let countdown;
@@ -175,6 +175,7 @@ document.addEventListener('DOMContentLoaded',function(){
                 pomodosCounter++;
             }
             pomodorosCounter.innerHTML = "#" + pomodosCounter;
+            
         }else{
             timeBtnStart.disabled = true;
             location.reload();
@@ -187,6 +188,7 @@ document.addEventListener('DOMContentLoaded',function(){
         timeBtnStart.style.removeProperty('display');
         timeBtnFF.style.display = 'none';
         timeBtnPause.style.display = 'none';
+        console.log(pomodosCounter);
         if(isWorking){
             clearInterval(countdown);
             updateDisplay(restDuration);
@@ -198,6 +200,7 @@ document.addEventListener('DOMContentLoaded',function(){
             body.style.backgroundColor = 'indianred';
             isWorking = true;
         }
+        
     });
 
     function working(){
@@ -231,14 +234,18 @@ document.addEventListener('DOMContentLoaded',function(){
         body.style.backgroundColor = 'black';
     }
 
+    //Number of pomodoros done per task 
 
+    
+
+    //task addition code 
 
     addTaskBtn.addEventListener('click', function() {
         const taskText = taskInput.value.trim();  // Getting the input value and trimming whitespace
         const pomodorosNeeded = amountOfPomodorosInput.value;
         if (taskText !== '' && pomodorosNeeded !== '' && pomodorosNeeded > 0 ) {
             const taskItem = document.createElement('li');
-            taskItem.innerHTML = `<div id="addedTask" class = "Task"><div><input type="checkbox"><p>${taskText}</p></div><div><div id="pomodosDone"></div><p>/${pomodorosNeeded}</p> <button>Del</button></div><div>`;
+            taskItem.innerHTML = `<div id="addedTask" class = "Task"><div><input type="checkbox"><p>${taskText}</p></div><div><p data-counter="0">/${pomodorosNeeded}</p> <button>Del</button></div><div>`;
             taskList.appendChild(taskItem);
             taskInput.value = '';  // Clearing the input field
             amountOfPomodorosInput.value = '';
@@ -262,6 +269,6 @@ document.addEventListener('DOMContentLoaded',function(){
             addTaskBtn.click();
         }
     });
-    //Number of pomodoros done 
 
+    
 });
