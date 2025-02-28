@@ -17,6 +17,10 @@ header h1{
     margin: 0;
 }
 
+p{
+    margin: 0;
+}
+
 .tajmer-container{
     display: flex;
     flex-direction: column;
@@ -70,10 +74,6 @@ li{
     color: black;
 }
 
-.active{
-    border-left: 5px solid black;
-}
-
 li:hover{
     background: lightgray;
     transition: 0.3s;
@@ -84,7 +84,7 @@ li:hover{
 }
 
 .Task div p{
-    margin: 20px;
+    margin: ;
 }
 
 .Task div:nth-child(1){
