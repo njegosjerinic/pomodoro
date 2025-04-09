@@ -1,3 +1,5 @@
+import { formatTime } from "./utils/timeUtils.js";
+
 document.addEventListener("DOMContentLoaded", function () {
   const countdownDisplay = document.getElementById("countdownDisplay");
   const pomodorosCounter = document.getElementById("pomodorosCounter");
@@ -11,7 +13,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const settingsScreen = document.getElementsByClassName("settings-screen")[0];
   const body = document.getElementsByTagName("BODY")[0];
   const taskInput = document.getElementById("taskInput");
-  const amountOfPomodorosInput = document.getElementById("amountOfPomodorosInput");
+  const amountOfPomodorosInput = document.getElementById(
+    "amountOfPomodorosInput"
+  );
   const addTaskBtn = document.getElementById("addTaskBtn");
   const taskList = document.getElementById("taskList");
   let countdown;
@@ -116,8 +120,6 @@ document.addEventListener("DOMContentLoaded", function () {
   function updateDisplay(time) {
     countdownDisplay.innerText = formatTime(time);
   }
-
-  
 
   function startWorkCountdown() {
     const duration = getInputDuration();
@@ -260,14 +262,13 @@ document.addEventListener("DOMContentLoaded", function () {
   container.addEventListener("click", (e) => {
     if (e.target && e.target.id === "increase-count") {
       increaseCounter(e.target);
-      console.log(amountOfPomodorosInput.innerText)
+      console.log(amountOfPomodorosInput.innerText);
     }
   });
 
   //Number of pomodoros done per task
 
   function increaseCounter(button) {
-
     let counterDisplay = button.parentElement.querySelector(".counterDisplay");
     let currentCount = parseInt(counterDisplay.dataset.counter, 10);
 
