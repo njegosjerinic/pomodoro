@@ -79,28 +79,24 @@ li:hover{
     transition: 0.3s;
 }
 
-.Task{
-    display:flex;
+.task{
+    display:none;
+    height: 70px;
+    background: white;
+    width: 450px;
+    margin: 5px;
+    border-radius: 5px;
 }
 
-.Task div p{
-    margin: ;
+
+
+.task p{
+    color: black;
 }
 
-.Task div:nth-child(1){
-    display: flex;
-    justify-content: flex-start;
-    width: 49%;
-    height: 100px;
-    align-items: center;
-}
 
-.Task div:nth-child(2){
-    display: flex;
-    justify-content: flex-end;
-    width: 49%;
-    align-items: center;
-}
+
+
 
 .settings-screen{
     z-index: 100;

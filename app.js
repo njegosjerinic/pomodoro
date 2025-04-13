@@ -1,4 +1,4 @@
-import { formatTime } from "./utils/timeUtils.js";
+import { formatTime } from "/utils/timeUtils.js";
 
 
   const countdownDisplay = document.getElementById("countdownDisplay");
@@ -15,13 +15,15 @@ import { formatTime } from "./utils/timeUtils.js";
   const taskInput = document.getElementById("taskInput");
   const amountOfPomodorosInput = document.getElementById("amountOfPomodorosInput");
   const addTaskBtn = document.getElementById("addTaskBtn");
-  const taskList = document.getElementById("taskList");
+  const taskContainer = document.getElementById("container-for-tasks");
+  const tasks = document.querySelectorAll("task");
+
   let countdown;
   let restCountdown;
   let isPaused = false;
   let pomodosCounter = 1;
   let isWorking = true;
-
+  let numberOfTasks = 0;
 
   //Load saved values from local storage
   timeInput.value = localStorage.getItem("timeInput") || "";
@@ -191,7 +193,11 @@ import { formatTime } from "./utils/timeUtils.js";
     const taskText = taskInput.value.trim(); // Getting the input value and trimming whitespace
     const pomodorosNeeded = amountOfPomodorosInput.value;
     if (taskText !== "" && pomodorosNeeded !== "" && pomodorosNeeded > 0) {
-      
+      taskContainer.children[numberOfTasks].style.display = "flex";
+      let taskContent = taskContainer.children[numberOfTasks].querySelectorAll('p');
+      taskContent[0].innerText = taskText;
+      taskContent[1].innerText = pomodorosNeeded;
+      numberOfTasks++
       
     }
   });
