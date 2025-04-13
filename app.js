@@ -1,29 +1,26 @@
-import { formatTime } from "/utils/timeUtils.js";
+const countdownDisplay = document.getElementById("countdownDisplay");
+const pomodorosCounter = document.getElementById("pomodorosCounter");
+const timeInput = document.getElementById("timeInput");
+const timeRestInput = document.getElementById("timeRestInput");
+const timeBtnStart = document.getElementById("timeBtnStart");
+const timeBtnFF = document.getElementById("timeBtnFF");
+const timeBtnPause = document.getElementById("timeBtnPause");
+const settings = document.getElementById("settings");
+const exitSettingsButton = document.getElementById("exit-settings");
+const settingsScreen = document.getElementsByClassName("settings-screen")[0];
+const body = document.getElementsByTagName("BODY")[0];
+const taskInput = document.getElementById("taskInput");
+const amountOfPomodorosInput = document.getElementById("amountOfPomodorosInput");
+const addTaskBtn = document.getElementById("addTaskBtn");
+const taskContainer = document.getElementById("container-for-tasks");
+const tasks = document.querySelectorAll("task");
 
-
-  const countdownDisplay = document.getElementById("countdownDisplay");
-  const pomodorosCounter = document.getElementById("pomodorosCounter");
-  const timeInput = document.getElementById("timeInput");
-  const timeRestInput = document.getElementById("timeRestInput");
-  const timeBtnStart = document.getElementById("timeBtnStart");
-  const timeBtnFF = document.getElementById("timeBtnFF");
-  const timeBtnPause = document.getElementById("timeBtnPause");
-  const settings = document.getElementById("settings");
-  const exitSettingsButton = document.getElementById("exit-settings");
-  const settingsScreen = document.getElementsByClassName("settings-screen")[0];
-  const body = document.getElementsByTagName("BODY")[0];
-  const taskInput = document.getElementById("taskInput");
-  const amountOfPomodorosInput = document.getElementById("amountOfPomodorosInput");
-  const addTaskBtn = document.getElementById("addTaskBtn");
-  const taskContainer = document.getElementById("container-for-tasks");
-  const tasks = document.querySelectorAll("task");
-
-  let countdown;
-  let restCountdown;
-  let isPaused = false;
-  let pomodosCounter = 1;
-  let isWorking = true;
-  let numberOfTasks = 0;
+let countdown;
+let restCountdown;
+let isPaused = false;
+let pomodosCounter = 1;
+let isWorking = true;
+let numberOfTasks = 0;
 
   //Load saved values from local storage
   timeInput.value = localStorage.getItem("timeInput") || "";
@@ -95,6 +92,13 @@ import { formatTime } from "/utils/timeUtils.js";
     },1000)
   }
  }
+
+
+  function formatTime(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+}
 
 
   function updateDisplay(time) {
