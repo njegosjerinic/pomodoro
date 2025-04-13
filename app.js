@@ -1,6 +1,6 @@
 import { formatTime } from "./utils/timeUtils.js";
 
-document.addEventListener("DOMContentLoaded", function () {
+
   const countdownDisplay = document.getElementById("countdownDisplay");
   const pomodorosCounter = document.getElementById("pomodorosCounter");
   const timeInput = document.getElementById("timeInput");
@@ -13,25 +13,29 @@ document.addEventListener("DOMContentLoaded", function () {
   const settingsScreen = document.getElementsByClassName("settings-screen")[0];
   const body = document.getElementsByTagName("BODY")[0];
   const taskInput = document.getElementById("taskInput");
-  const amountOfPomodorosInput = document.getElementById(
-    "amountOfPomodorosInput"
-  );
+  const amountOfPomodorosInput = document.getElementById("amountOfPomodorosInput");
   const addTaskBtn = document.getElementById("addTaskBtn");
   const taskList = document.getElementById("taskList");
   let countdown;
-  let timeRemaning;
   let restCountdown;
   let isPaused = false;
-  let pomodosCounter = 0;
+  let pomodosCounter = 1;
   let isWorking = true;
-  let isResting = true;
-  let restTimeRemaning;
+
 
   //Load saved values from local storage
   timeInput.value = localStorage.getItem("timeInput") || "";
   timeRestInput.value = localStorage.getItem("timeRestInput");
 
-  //Setting up the starting value of pomodoro
+  //This is used to update the display value on input 
+  timeInput.addEventListener("input", function () {
+    const duration = getInput(timeInput.value);
+    if (duration !== null) {
+      updateDisplay(duration);
+    }
+  });
+
+  //Begining value that is hown on the screen Its below the localStorage because it uses it
   countdownDisplay.value = updateDisplay(parseInt(timeInput.value * 60));
 
   //Save input values to local storage on change
@@ -44,110 +48,60 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   //Getting the input for work duration
-  function getInputDuration() {
-    const inputValue = timeInput.value;
-    const duration = parseInt(inputValue * 60);
+  function getInput(input) {
+    const duration = parseInt(input)
     if (isNaN(duration) || duration <= 0) {
       alert("Please enter a right amount of minutes for work");
       return null;
     }
-    return duration;
+    return input * 60
   }
 
-  //Getting the input for rest duration
-  function getInputRestDuration() {
-    const inputRestValue = timeRestInput.value;
-    const restDuration = parseInt(inputRestValue * 60);
-    if (isNaN(restDuration) || restDuration <= 0) {
-      alert("Please enter the right amount of minutes for rest");
-      return null;
-    }
-    return restDuration;
-  }
-
-  //Making a timer for work interval
-  function workTimer(duration) {
-    isWorking = true;
-
-    timeRemaning = duration;
-
-    updateDisplay(timeRemaning);
-
-    countdown = setInterval(function () {
-      if (!isPaused) {
-        timeRemaning--;
-        updateDisplay(timeRemaning);
+  //Timer code and all the logic about it 
+ function Timer(duration,restDuration){
+  if(isWorking){
+    updateDisplay(duration)
+    updatePomodorosDone();
+    countdown = setInterval(function(){
+      if(!isPaused){
+        duration--;
+        updateDisplay(duration)
+        working();
       }
 
-      if (timeRemaning < 0) {
-        clearInterval(countdown);
+      if(duration == 0){
+        clearInterval(countdown)
+        isWorking = false;
+        preResting();
+        updateDisplay(getInput(restDuration));
+      }
+    },1000)
+  }else if(!isWorking){
+    restCountdown = setInterval(function(){
+      if(!isPaused){
+        restDuration--;
         resting();
-        updateDisplay(getInputRestDuration());
-        pomodosCounter++;
-        pomodorosCounter.innerHTML = `#${pomodosCounter}`;
-        timeBtnStart.style.removeProperty("display");
-        timeBtnFF.style.display = "none";
-        timeBtnPause.style.display = "none";
-      }
-    }, 1000);
-  }
-
-  //Making timer for rest interval
-  function restTimer(restDuration) {
-    isWorking = false;
-
-    restTimeRemaning = restDuration;
-
-    updateDisplay(restTimeRemaning);
-
-    restCountdown = setInterval(function () {
-      if (!isPaused) {
-        restTimeRemaning--;
-        updateDisplay(restTimeRemaning);
+        updateDisplay(restDuration);
       }
 
-      if (restTimeRemaning < 0) {
+      if(restDuration == 0){
         clearInterval(restCountdown);
-        updateDisplay(getInputDuration());
-        body.style.backgroundColor = "indianred";
-        timeBtnStart.style.removeProperty("display");
-        timeBtnFF.style.display = "none";
-        timeBtnPause.style.display = "none";
+        isWorking = true;
+        preWorking();
+        updateDisplay(getInput(duration));
       }
-    }, 1000);
+    },1000)
   }
+ }
+
 
   function updateDisplay(time) {
     countdownDisplay.innerText = formatTime(time);
   }
 
-  function startWorkCountdown() {
-    const duration = getInputDuration();
-    const restDuration = getInputRestDuration();
-    timeBtnStart.style.display = "none";
-    timeBtnFF.style.display = "block";
-    timeBtnPause.style.display = "block";
-    if (isResting && duration !== 0) {
-      clearInterval(restCountdown);
-      workTimer(duration);
-      updateDisplay(duration);
-      working();
-      isResting = false;
-    } else if (!isResting) {
-      clearInterval(countdown);
-      restTimer(restDuration);
-      updateDisplay(restDuration);
-      resting();
-      isResting = true;
-    }
+  function updatePomodorosDone(){
+    pomodorosCounter.innerText = `#${pomodosCounter++}`;
   }
-
-  timeInput.addEventListener("input", function () {
-    const duration = getInputDuration();
-    if (duration !== null) {
-      updateDisplay(duration);
-    }
-  });
 
   settings.addEventListener("click", function () {
     settingsScreen.style.display = "block";
@@ -157,46 +111,56 @@ document.addEventListener("DOMContentLoaded", function () {
     settingsScreen.style.display = "none";
   });
 
+  //Starting the timer
   timeBtnStart.addEventListener("click", function () {
-    let duration = getInputDuration();
-    let restDuration = getInputRestDuration();
-    if (duration > 0 && restDuration > 0) {
-      startWorkCountdown();
-      if (isWorking) {
-        pomodosCounter++;
-      }
-      pomodorosCounter.innerHTML = "#" + pomodosCounter;
-    } else {
-      timeBtnStart.disabled = true;
-      location.reload();
-    }
+    Timer(getInput(timeInput.value),getInput(timeRestInput.value));
   });
 
+  //Actions that the Fast Foward button does 
   timeBtnFF.addEventListener("click", function () {
-    const duration = getInputDuration();
-    const restDuration = getInputRestDuration();
-    timeBtnStart.style.removeProperty("display");
-    timeBtnFF.style.display = "none";
-    timeBtnPause.style.display = "none";
+    const duration = getInput(timeInput.value);
+    const restDuration = getInput(timeRestInput.value);
+    
     if (isWorking) {
       clearInterval(countdown);
       updateDisplay(restDuration);
-      resting();
+      preResting();
       isWorking = false;
     } else if (!isWorking) {
       clearInterval(restCountdown);
       updateDisplay(duration);
-      body.style.backgroundColor = "indianred";
+      preWorking();
       isWorking = true;
     }
   });
 
+  //These are the states of the timer in the app
+  function preWorking(){
+    body.style.backgroundColor = "indianred";
+    timeBtnStart.style.display = "block";
+    timeBtnFF.style.display = "none";
+    timeBtnPause.style.display = "none";
+  }
+
   function working() {
     body.style.backgroundColor = "black";
+    timeBtnStart.style.display = "none";
+    timeBtnFF.style.display = "block";
+    timeBtnPause.style.display = "block";
+  }
+
+  function preResting(){
+    timeBtnStart.style.display = "block";
+    timeBtnFF.style.display = "none";
+    timeBtnPause.style.display = "none";
+    body.style.backgroundColor = "green";
   }
 
   function resting() {
     body.style.backgroundColor = "green";
+    timeBtnStart.style.display = "none";
+    timeBtnFF.style.display = "block";
+    timeBtnPause.style.display = "block";
   }
 
   //Code for pausing
@@ -227,64 +191,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const taskText = taskInput.value.trim(); // Getting the input value and trimming whitespace
     const pomodorosNeeded = amountOfPomodorosInput.value;
     if (taskText !== "" && pomodorosNeeded !== "" && pomodorosNeeded > 0) {
-      const taskItem = document.createElement("li");
-      taskItem.innerHTML = `
-            <div id="addedTask" class="Task">
-                <div>
-                    <input type="checkbox">
-                    <p>${taskText}</p>
-                </div>
-                <div>
-                    <p class="counterDisplay" data-counter="0">${pomodosCounter}/<p>${pomodorosNeeded}</p></p>
-                    <button id="increase-count">Increase</button>
-                    <button class= "delete">Del</button>
-                </div>
-            </div>
-            `;
-
-      taskList.appendChild(taskItem);
-      taskInput.value = ""; // Clearing the input field
-      amountOfPomodorosInput.value = "";
-
-      taskItem.addEventListener("click", function () {
-        taskItem.classList.toggle("active");
-      });
-
-      const deleteBtn = taskItem.querySelector("delete");
-      deleteBtn.addEventListener("click", function () {
-        taskList.removeChild(taskItem);
-      });
+      
+      
     }
   });
 
-  const container = document.getElementById("container");
-
-  container.addEventListener("click", (e) => {
-    if (e.target && e.target.id === "increase-count") {
-      increaseCounter(e.target);
-      console.log(amountOfPomodorosInput.innerText);
-    }
-  });
-
-  //Number of pomodoros done per task
-
-  function increaseCounter(button) {
-    let counterDisplay = button.parentElement.querySelector(".counterDisplay");
-    let currentCount = parseInt(counterDisplay.dataset.counter, 10);
-
-    currentCount++; // Increment the counter
-    counterDisplay.dataset.counter = currentCount; // Update data attribute
-    counterDisplay.textContent = `${currentCount}/${amountOfPomodorosInput.value}`; // Update displayed text
-  }
-
-  const increment = document.getElementById("increment");
-  increment.addEventListener("click", function () {
-    increaseCounter();
-  });
+  
 
   taskInput.addEventListener("keypress", function (event) {
     if (event.key === "Enter") {
       addTaskBtn.click();
     }
   });
-});
+
