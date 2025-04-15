@@ -22,6 +22,13 @@ let pomodosCounter = 1;
 let isWorking = true;
 let numberOfTasks = 0;
 
+
+function formatTime(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+}
+
   //Load saved values from local storage
   timeInput.value = localStorage.getItem("timeInput") || "";
   timeRestInput.value = localStorage.getItem("timeRestInput");
@@ -36,6 +43,7 @@ let numberOfTasks = 0;
 
   //Begining value that is hown on the screen Its below the localStorage because it uses it
   countdownDisplay.value = updateDisplay(parseInt(timeInput.value * 60));
+
 
   //Save input values to local storage on change
   timeInput.addEventListener("input", function () {
@@ -53,7 +61,7 @@ let numberOfTasks = 0;
       alert("Please enter a right amount of minutes for work");
       return null;
     }
-    return input * 60
+    return input * 60;
   }
 
   //Timer code and all the logic about it 
@@ -72,7 +80,7 @@ let numberOfTasks = 0;
         clearInterval(countdown)
         isWorking = false;
         preResting();
-        updateDisplay(getInput(restDuration));
+        updateDisplay(restDuration);
       }
     },1000)
   }else if(!isWorking){
@@ -87,18 +95,12 @@ let numberOfTasks = 0;
         clearInterval(restCountdown);
         isWorking = true;
         preWorking();
-        updateDisplay(getInput(duration));
+        updateDisplay(duration);
       }
     },1000)
   }
  }
 
-
-  function formatTime(seconds) {
-  const minutes = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
-}
 
 
   function updateDisplay(time) {
@@ -191,21 +193,99 @@ let numberOfTasks = 0;
     body.style.backgroundColor = "black";
   }
 
-  //task addition code
+  //JSON of tasks made in object form
+  let taskList = JSON.parse(localStorage.getItem("tasks")) || [];
 
+  
+  //This is the event to which the task list function runs 
   addTaskBtn.addEventListener("click", function () {
+    let taskList = JSON.parse(localStorage.getItem("tasks")) || [];
     const taskText = taskInput.value.trim(); // Getting the input value and trimming whitespace
     const pomodorosNeeded = amountOfPomodorosInput.value;
+    let pomodorosDone = 0;
     if (taskText !== "" && pomodorosNeeded !== "" && pomodorosNeeded > 0) {
-      taskContainer.children[numberOfTasks].style.display = "flex";
-      let taskContent = taskContainer.children[numberOfTasks].querySelectorAll('p');
-      taskContent[0].innerText = taskText;
-      taskContent[1].innerText = pomodorosNeeded;
-      numberOfTasks++
-      
+      const newTask = {
+        id : `task-${numberOfTasks + 1}`,
+        name : taskText,
+        pomodorosToDo : pomodorosNeeded,
+        donePomodoros : pomodorosDone
+      }
+      taskList.push(newTask)
+
+      localStorage.setItem("tasks",JSON.stringify(taskList));
+
+      taskCreator(newTask)
+
+      taskInput.value = "";
+      pomodorosNeeded.value = "";
+      console.log(taskList)
+      console.log(newTask.donePomodoros)
     }
   });
 
+  //This makes the Tasks
+  function taskCreator(task){
+    let {id, name, pomodorosToDo, donePomodoros} = task;
+
+      const taskDiv = document.createElement("div");
+      taskDiv.addEventListener('click',function(){
+        taskDiv.classList.toggle('active');
+        donePomodoros += 1;
+      })
+
+      taskDiv.id = id;
+      taskDiv.className = "task"
+
+      const taskPDesc = document.createElement("p");
+      taskPDesc.innerText = name;
+
+      const taskPTime = document.createElement("p");
+      taskPTime.innerText =donePomodoros + "/" + pomodorosToDo;
+
+
+      const deleteButton = document.createElement("button");
+      deleteButton.innerText = "del";
+      deleteButton.id = `button-${numberOfTasks + 1}`;
+      
+      taskContainer.appendChild(taskDiv);
+      taskDiv.appendChild(taskPDesc);
+      taskDiv.appendChild(taskPTime);
+      taskDiv.appendChild(deleteButton);
+
+      deleteButton.addEventListener('click',() =>{
+        taskContainer.removeChild(taskDiv);
+        deleteTask(text)
+        console.log(taskList)
+      })
+      
+      numberOfTasks++
+  }
+
+  function deleteTask(taskName) {
+    // Get current tasks
+    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  
+    // Filter out the one we want to delete
+    tasks = tasks.filter(task => task.name !== taskName);
+  
+    // Save the new list
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  
+  }
+  
+
+
+  function renderTasks(){
+    
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    let taskList = JSON.parse(localStorage.getItem("tasks")) || [];
+    taskList.forEach(task => {
+      taskCreator(task);
+    });
+  });
+  
   
 
   taskInput.addEventListener("keypress", function (event) {

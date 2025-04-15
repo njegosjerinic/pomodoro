@@ -61,31 +61,21 @@ p{
     color: white;
 }
 
-ul{
-    list-style-type: none;
-    width: 100%;
-    padding: 0;
-}
-
-li{
-    height: 100px;
-    width: 100%;
-    background: white;
-    color: black;
-}
-
-li:hover{
-    background: lightgray;
-    transition: 0.3s;
-}
 
 .task{
-    display:none;
+    display:flex;
     height: 70px;
     background: white;
     width: 450px;
     margin: 5px;
+    padding: 0 5px;
     border-radius: 5px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.task:hover{
+    background: lightgray;
 }
 
 
