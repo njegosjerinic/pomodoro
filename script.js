@@ -202,7 +202,8 @@ function formatTime(seconds) {
     let taskList = JSON.parse(localStorage.getItem("tasks")) || [];
     const taskText = taskInput.value.trim(); // Getting the input value and trimming whitespace
     const pomodorosNeeded = amountOfPomodorosInput.value;
-    let pomodorosDone = 0;
+    let pomodorosDone = pomodosCounter;
+    console.log(pomodorosDone)
     if (taskText !== "" && pomodorosNeeded !== "" && pomodorosNeeded > 0) {
       const newTask = {
         id : `task-${numberOfTasks + 1}`,
@@ -230,7 +231,11 @@ function formatTime(seconds) {
       const taskDiv = document.createElement("div");
       taskDiv.addEventListener('click',function(){
         taskDiv.classList.toggle('active');
-        donePomodoros += 1;
+        let value = parseInt(donePomodorosContainer.innerText);
+        value++;
+        donePomodorosContainer.innerText = value;
+        console.log(value)
+        
       })
 
       taskDiv.id = id;
@@ -239,8 +244,13 @@ function formatTime(seconds) {
       const taskPDesc = document.createElement("p");
       taskPDesc.innerText = name;
 
+      const donePomodorosContainer = document.createElement("p");
+      donePomodorosContainer.innerText = 0;
+
       const taskPTime = document.createElement("p");
-      taskPTime.innerText =donePomodoros + "/" + pomodorosToDo;
+      taskPTime.innerText = donePomodoros+ "/" + pomodorosToDo;
+
+      
 
 
       const deleteButton = document.createElement("button");
@@ -272,11 +282,9 @@ function formatTime(seconds) {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   
   }
-  
 
+  function incrementPomodorosPerTask(){
 
-  function renderTasks(){
-    
   }
 
   window.addEventListener("DOMContentLoaded", () => {
