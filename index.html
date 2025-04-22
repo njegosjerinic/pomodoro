@@ -4,21 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <title>Pomodoro</title>
 </head>
 <body>
-    <div class="settings-screen">
-        <header>
-            <p>settings</p>
-            <button id="exit-settings">exit</button>
-        </header>
-        <div class="input-box">
-            <p>Input minutes work</p>
-            <input type="number" id="timeInput">
+    <div id="overlay" class="overlay"></div>
+    <div class="settings-screen">         
+        <div class="exit-container">
+            <button id="exit-settings">X</button>
         </div>
-        <div class="input-box">
-            <p>Input minutes rest</p>
-            <input type="number" id="timeRestInput">
+        <div class="input">
+            <div class="input-box">
+                <p>Input minutes work</p>
+                <input type="number" id="timeInput">
+            </div>
+            <div class="input-box">
+                <p>Input minutes rest</p>
+                <input type="number" id="timeRestInput">
+            </div>
+            <div class="button-container">
+                <button id="inputTime">OK</button>
+            </div>
         </div>
     </div>
     <div class="pomodoro-layout">
@@ -26,22 +32,24 @@
             <h1>POMODORO TIMER</h1>
             <button id="settings">settings</button>
         </header>
-        <div class="tajmer-container">
-            <div id="countdownDisplay">00:00</div>
-            <div class="controllTime">
-                <button id="timeBtnStart">Start</button>
-                <button id="timeBtnPause">Pause</button>
-                <button id="timeBtnFF">>|</button>
+        <div class="timer-container">
+            <div class="timer-background">
+                <div id="countdownDisplay">00:00</div>
+                <div class="controllTime">
+                    <button id="timeBtnStart">Start</button>
+                    <button id="timeBtnPause">Pause</button>
+                    <button id="timeBtnFF">>|</button>
+                </div>
             </div>
         </div>
         <div class="pomodorosCounter" id="pomodorosCounter">#1</div>
         <div class="task-container" id="container">
             <h1>TASKS</h1>
-            <div class="input-task">
+            <form class="taskForm">
                 <input type="text" id="taskInput" placeholder="Add taks here">
                 <input type="number" id="amountOfPomodorosInput" placeholder="Amount of pomodoros">
-                <button id="addTaskBtn">Add Task</button>
-            </div>
+                <button id="addTaskBtn" type="submit">Add Task</button>
+            </form>
             <div id="container-for-tasks">
             </div>
         </div>

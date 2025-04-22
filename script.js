@@ -1,26 +1,28 @@
-const countdownDisplay = document.getElementById("countdownDisplay");
-const pomodorosCounter = document.getElementById("pomodorosCounter");
-const timeInput = document.getElementById("timeInput");
-const timeRestInput = document.getElementById("timeRestInput");
-const timeBtnStart = document.getElementById("timeBtnStart");
-const timeBtnFF = document.getElementById("timeBtnFF");
-const timeBtnPause = document.getElementById("timeBtnPause");
-const settings = document.getElementById("settings");
-const exitSettingsButton = document.getElementById("exit-settings");
-const settingsScreen = document.getElementsByClassName("settings-screen")[0];
-const body = document.getElementsByTagName("BODY")[0];
-const taskInput = document.getElementById("taskInput");
-const amountOfPomodorosInput = document.getElementById("amountOfPomodorosInput");
-const addTaskBtn = document.getElementById("addTaskBtn");
-const taskContainer = document.getElementById("container-for-tasks");
 const tasks = document.querySelectorAll("task");
+const settings = document.getElementById("settings");
+const body = document.getElementsByTagName("BODY")[0];
+const timeInput = document.getElementById("timeInput");
+const taskInput = document.getElementById("taskInput");
+const timeBtnFF = document.getElementById("timeBtnFF");
+const addTaskBtn = document.getElementById("addTaskBtn");
+const timeBtnPause = document.getElementById("timeBtnPause");
+const timeBtnStart = document.getElementById("timeBtnStart");
+const timeRestInput = document.getElementById("timeRestInput");
+const exitSettingsButton = document.getElementById("exit-settings");
+const countdownDisplay = document.getElementById("countdownDisplay");
+const taskContainer = document.getElementById("container-for-tasks");
+const pomodorosCounter = document.getElementById("pomodorosCounter");
+const settingsScreen = document.getElementsByClassName("settings-screen")[0];
+const amountOfPomodorosInput = document.getElementById("amountOfPomodorosInput");
+const input = document.getElementById('inputTime');
+const overlay = document.getElementById('overlay');
 
 let countdown;
 let restCountdown;
 let isPaused = false;
-let pomodosCounter = 1;
 let isWorking = true;
 let numberOfTasks = 0;
+let pomodosCounter = 1;
 
 
 function formatTime(seconds) {
@@ -33,16 +35,20 @@ function formatTime(seconds) {
   timeInput.value = localStorage.getItem("timeInput") || "";
   timeRestInput.value = localStorage.getItem("timeRestInput");
 
+  
+
   //This is used to update the display value on input 
-  timeInput.addEventListener("input", function () {
+  input.addEventListener("click", function () {
     const duration = getInput(timeInput.value);
     if (duration !== null) {
-      updateDisplay(duration);
+      updateTimer(duration);
+      settingsScreen.style.display = "none";
+      overlay.style.display = "none";
     }
   });
 
   //Begining value that is hown on the screen Its below the localStorage because it uses it
-  countdownDisplay.value = updateDisplay(parseInt(timeInput.value * 60));
+  countdownDisplay.value = updateTimer(parseInt(timeInput.value * 60));
 
 
   //Save input values to local storage on change
@@ -67,12 +73,13 @@ function formatTime(seconds) {
   //Timer code and all the logic about it 
  function Timer(duration,restDuration){
   if(isWorking){
-    updateDisplay(duration)
-    updatePomodorosDone();
+    updateTimer(duration)
+    updatePomodorosCounter();
+    updatePomodorosCounterPerTask();
     countdown = setInterval(function(){
       if(!isPaused){
         duration--;
-        updateDisplay(duration)
+        updateTimer(duration)
         working();
       }
 
@@ -80,7 +87,7 @@ function formatTime(seconds) {
         clearInterval(countdown)
         isWorking = false;
         preResting();
-        updateDisplay(restDuration);
+        updateTimer(restDuration);
       }
     },1000)
   }else if(!isWorking){
@@ -88,14 +95,14 @@ function formatTime(seconds) {
       if(!isPaused){
         restDuration--;
         resting();
-        updateDisplay(restDuration);
+        updateTimer(restDuration);
       }
 
       if(restDuration == 0){
         clearInterval(restCountdown);
         isWorking = true;
         preWorking();
-        updateDisplay(duration);
+        updateTimer(duration);
       }
     },1000)
   }
@@ -103,20 +110,28 @@ function formatTime(seconds) {
 
 
 
-  function updateDisplay(time) {
+
+  function updateTimer(time) {
     countdownDisplay.innerText = formatTime(time);
   }
 
-  function updatePomodorosDone(){
+  function updatePomodorosCounter(){
     pomodorosCounter.innerText = `#${pomodosCounter++}`;
+    taskList.forEach(task => {
+      if(task.isActive){
+        task.donePomodoros++;
+      }
+    })
   }
 
   settings.addEventListener("click", function () {
     settingsScreen.style.display = "block";
+    overlay.style.display = 'block';
   });
 
   exitSettingsButton.addEventListener("click", function () {
     settingsScreen.style.display = "none";
+    overlay.style.display = 'none';
   });
 
   //Starting the timer
@@ -131,12 +146,12 @@ function formatTime(seconds) {
     
     if (isWorking) {
       clearInterval(countdown);
-      updateDisplay(restDuration);
+      updateTimer(restDuration);
       preResting();
       isWorking = false;
     } else if (!isWorking) {
       clearInterval(restCountdown);
-      updateDisplay(duration);
+      updateTimer(duration);
       preWorking();
       isWorking = true;
     }
@@ -196,109 +211,105 @@ function formatTime(seconds) {
   //JSON of tasks made in object form
   let taskList = JSON.parse(localStorage.getItem("tasks")) || [];
 
-  
-  //This is the event to which the task list function runs 
-  addTaskBtn.addEventListener("click", function () {
-    let taskList = JSON.parse(localStorage.getItem("tasks")) || [];
-    const taskText = taskInput.value.trim(); // Getting the input value and trimming whitespace
-    const pomodorosNeeded = amountOfPomodorosInput.value;
-    let pomodorosDone = pomodosCounter;
-    console.log(pomodorosDone)
-    if (taskText !== "" && pomodorosNeeded !== "" && pomodorosNeeded > 0) {
-      const newTask = {
-        id : `task-${numberOfTasks + 1}`,
-        name : taskText,
-        pomodorosToDo : pomodorosNeeded,
-        donePomodoros : pomodorosDone
-      }
-      taskList.push(newTask)
+  function saveTasks(){
+    localStorage.setItem('tasks', JSON.stringify(taskList))
+  }
 
-      localStorage.setItem("tasks",JSON.stringify(taskList));
-
-      taskCreator(newTask)
-
-      taskInput.value = "";
-      pomodorosNeeded.value = "";
-      console.log(taskList)
-      console.log(newTask.donePomodoros)
-    }
-  });
-
-  //This makes the Tasks
-  function taskCreator(task){
-    let {id, name, pomodorosToDo, donePomodoros} = task;
+  //This renders the Tasks
+  function renderTask(task){
+    let {id, name, pomodorosToDo, donePomodoros, isActive} = task;
 
       const taskDiv = document.createElement("div");
-      taskDiv.addEventListener('click',function(){
-        taskDiv.classList.toggle('active');
-        let value = parseInt(donePomodorosContainer.innerText);
-        value++;
-        donePomodorosContainer.innerText = value;
-        console.log(value)
-        
-      })
-
-      taskDiv.id = id;
+      taskDiv.dataset.id = id;
       taskDiv.className = "task"
 
-      const taskPDesc = document.createElement("p");
-      taskPDesc.innerText = name;
+      const taskDesc = document.createElement("p");
+      taskDesc.innerText = name;
 
-      const donePomodorosContainer = document.createElement("p");
-      donePomodorosContainer.innerText = 0;
-
-      const taskPTime = document.createElement("p");
-      taskPTime.innerText = donePomodoros+ "/" + pomodorosToDo;
-
+      const taskTime = document.createElement("p");
+      taskTime.innerText = `${donePomodoros} / ${pomodorosToDo}`;
       
-
+      if(isActive){
+        taskDiv.className = ('task active');
+      }
 
       const deleteButton = document.createElement("button");
       deleteButton.innerText = "del";
-      deleteButton.id = `button-${numberOfTasks + 1}`;
-      
-      taskContainer.appendChild(taskDiv);
-      taskDiv.appendChild(taskPDesc);
-      taskDiv.appendChild(taskPTime);
-      taskDiv.appendChild(deleteButton);
+      deleteButton.id = `button-${Date.now()}`;
 
-      deleteButton.addEventListener('click',() =>{
+      deleteButton.addEventListener('click',e =>{
+        e.stopPropagation();
         taskContainer.removeChild(taskDiv);
-        deleteTask(text)
-        console.log(taskList)
+        taskList = taskList.filter(t => t.id !== id);
+        saveTasks();
       })
+
+      taskDiv.addEventListener('click', () => {
+        if(taskDiv.classList.contains('active')) return;
+
+        document.querySelectorAll('.task.active').forEach(el => 
+          el.classList.remove('active')
+        );
+
+        taskDiv.classList.add('active');
+
+
+        taskList.forEach(t => t.isActive = false);
+        task.isActive = true;
+
+        taskTime.innerText = `${task.donePomodoros} / ${pomodorosToDo}`;
+        saveTasks();
+      })
+
+      taskDiv.append(taskDesc, taskTime, deleteButton)
+      taskContainer.appendChild(taskDiv)
       
-      numberOfTasks++
   }
 
-  function deleteTask(taskName) {
-    // Get current tasks
-    let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-  
-    // Filter out the one we want to delete
-    tasks = tasks.filter(task => task.name !== taskName);
-  
-    // Save the new list
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  
-  }
+  function addTask(){
+    const name = taskInput.value.trim();
+    const pomodorosToDo = parseInt(amountOfPomodorosInput.value, 10);
 
-  function incrementPomodorosPerTask(){
-
-  }
-
-  window.addEventListener("DOMContentLoaded", () => {
-    let taskList = JSON.parse(localStorage.getItem("tasks")) || [];
-    taskList.forEach(task => {
-      taskCreator(task);
-    });
-  });
-  
-  
-
-  taskInput.addEventListener("keypress", function (event) {
-    if (event.key === "Enter") {
-      addTaskBtn.click();
+    if (!name || isNaN(pomodorosToDo) || pomodorosToDo <= 0) {
+      alert('Please enter a task name and a positive number of Pomodoros.');
+      return;
     }
+  
+
+  const newTask = {
+    id : `task-${Date.now()}`,
+    name,
+    pomodorosToDo,
+    donePomodoros:0,
+    isActive : false
+  }
+
+  taskList.push(newTask);
+  saveTasks();
+  renderTask(newTask);
+
+  taskInput.value = '';
+  amountOfPomodorosInput.value = '';
+  
+  }
+
+  function updatePomodorosCounterPerTask(){
+    taskContainer.innerHTML = '';
+
+  // 2) re‑render each task
+    taskList.forEach(renderTask);
+  }
+
+
+
+  window.addEventListener('DOMContentLoaded', () => {
+    taskList.forEach(renderTask)
+  })
+
+  addTaskBtn.addEventListener('click', addTask);
+  taskInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') addTask();
   });
+  
+  
 
