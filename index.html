@@ -15,11 +15,11 @@
         </div>
         <div class="input">
             <div class="input-box">
-                <p>Input minutes work</p>
+                <p>Pomodoro</p>
                 <input type="number" id="timeInput">
             </div>
             <div class="input-box">
-                <p>Input minutes rest</p>
+                <p>Rest</p>
                 <input type="number" id="timeRestInput">
             </div>
             <div class="button-container">
@@ -44,16 +44,27 @@
         </div>
         <div class="pomodorosCounter" id="pomodorosCounter">#1</div>
         <div class="task-container" id="container">
-            <h1>TASKS</h1>
-            <form class="taskForm">
-                <input type="text" id="taskInput" placeholder="Add taks here">
-                <input type="number" id="amountOfPomodorosInput" placeholder="Amount of pomodoros">
-                <button id="addTaskBtn" type="submit">Add Task</button>
-            </form>
+            <div class="taskForm">
+                <button id="addTaskBtn">+ Add Task</button>
+                <div id = "addTaskPanel">
+                    <input type="text" id="taskInput" placeholder="What are you working on?">
+                    <p>Est. Pomodoros</p>
+                    <input type="number" id="amountOfPomodorosInput" placeholder="1" value="1">
+                    <div class="taskCreationButtons">
+                        <button id="createTask">Save</button>
+                        <button id="cancelCreation">Cancel</button>
+                    </div>
+                </div>
+            </div>
             <div id="container-for-tasks">
+                
+            </div>
+            <div id ="title">
+                <h1>TASKS</h1>
             </div>
         </div>
     </div>
+    <script src="script.js"></script>
 </body>
-<script src="script.js"></script>
+
 </html>

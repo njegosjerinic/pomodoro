@@ -17,7 +17,7 @@ header{
     display: flex;
     justify-content: space-between;
     width: 600px;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid white;
 }
 
 header h1{
@@ -75,13 +75,15 @@ p{
 
 .task-container{
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     align-items: center;
     color: white;
 }
 
 #container-for-tasks{
-
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 
@@ -102,7 +104,12 @@ p{
     background: lightgray;
 }
 
-
+.task button{
+    font-size: large;
+    background: white;
+    border: 0;
+    color: gray;
+}
 
 .task p{
     color: black;
@@ -145,6 +152,17 @@ p{
     color: gray;
 }
 
+.exit-container{
+    display: flex;
+    justify-content: flex-end;
+}
+
+#exit-settings{
+    font-size: large;
+    border: 0;
+    background: transparent;
+}
+
 .overlay {
     display: none;
     position: fixed;
@@ -171,6 +189,7 @@ p{
     border: 0;
     border-radius: 5px;
     color: indianred;
+    font-size: 25px;
 }
 
 #timeBtnPause{
@@ -179,23 +198,84 @@ p{
     background-color: rgba(255, 255, 255, 0);
     color: white;
     border: 0;
+    font-size: 25px;
 }
 
 #timeBtnFF{
     background-color: rgba(255, 255, 255, 0);
     color: white;
     border: 0;
-    
+    font-size: 25px;
+}
+
+.taskForm{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    position: relative;
 }
 
 #addTaskBtn{
-    width: 100%;
-    height: 50px;
+    width: 98%;
+    height: 70px;
     background: transparent;
     color: white;
     font-size: large;
     border: 1px solid white;
     border-radius: 10px;
+}
+
+#addTaskPanel{
+    display: none;
+    background: white;
+    height: 200px;
+    width: 425px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-around;
+    padding: 20px;
+    border-radius: 10px;
+    color: black;
+}
+
+#addTaskPanel p{
+    font-weight: 600;
+}
+
+.taskCreationButtons{
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+}
+
+#taskInput{
+    font-size: large;
+    border: 0;
+    font-style: italic;
+    width: 210px;
+}
+
+#amountOfPomodorosInput{
+    width: 50px;
+    height: 35px;
+    font-size: large;
+    background: lightgrey;
+    border: 0;
+    border-radius: 5px;
+}
+
+#createTask{
+    background: black;
+    color: white;
+    border: 0;
+    height: 30px;
+    width: 50px;
+    border-radius: 5px;
+}
+
+.none{
+    display: none;
 }
 
 @media screen and (max-width:620px) {

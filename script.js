@@ -14,8 +14,13 @@ const taskContainer = document.getElementById("container-for-tasks");
 const pomodorosCounter = document.getElementById("pomodorosCounter");
 const settingsScreen = document.getElementsByClassName("settings-screen")[0];
 const amountOfPomodorosInput = document.getElementById("amountOfPomodorosInput");
+const createTask = document.getElementById('createTask');
+const cancelCreation = document.getElementById('cancelCreation');
+const addTaskPanel = document.getElementById('addTaskPanel');
 const input = document.getElementById('inputTime');
 const overlay = document.getElementById('overlay');
+const audio = new Audio("audiomass-output.mp3");
+const title = document.getElementById("title");
 
 let countdown;
 let restCountdown;
@@ -84,6 +89,7 @@ function formatTime(seconds) {
       }
 
       if(duration == 0){
+        audio.play();
         clearInterval(countdown)
         isWorking = false;
         preResting();
@@ -99,6 +105,7 @@ function formatTime(seconds) {
       }
 
       if(restDuration == 0){
+        audio.play();
         clearInterval(restCountdown);
         isWorking = true;
         preWorking();
@@ -149,7 +156,7 @@ function formatTime(seconds) {
       updateTimer(restDuration);
       preResting();
       isWorking = false;
-    } else if (!isWorking) {
+    } else{
       clearInterval(restCountdown);
       updateTimer(duration);
       preWorking();
@@ -163,6 +170,8 @@ function formatTime(seconds) {
     timeBtnStart.style.display = "block";
     timeBtnFF.style.display = "none";
     timeBtnPause.style.display = "none";
+    taskContainer.style.display = "block";
+    addTaskBtn.style.display = "block";
   }
 
   function working() {
@@ -170,6 +179,9 @@ function formatTime(seconds) {
     timeBtnStart.style.display = "none";
     timeBtnFF.style.display = "block";
     timeBtnPause.style.display = "block";
+    taskContainer.style.display = "none";
+    addTaskBtn.style.display = "none";
+    title.style.display = "none";
   }
 
   function preResting(){
@@ -177,6 +189,8 @@ function formatTime(seconds) {
     timeBtnFF.style.display = "none";
     timeBtnPause.style.display = "none";
     body.style.backgroundColor = "green";
+    taskContainer.style.display = "block";
+    addTaskBtn.style.display = "block";
   }
 
   function resting() {
@@ -184,6 +198,8 @@ function formatTime(seconds) {
     timeBtnStart.style.display = "none";
     timeBtnFF.style.display = "block";
     timeBtnPause.style.display = "block";
+    taskContainer.style.display = "block";
+    addTaskBtn.style.display = "block";
   }
 
   //Code for pausing
@@ -199,13 +215,24 @@ function formatTime(seconds) {
   function pauseCountdown() {
     isPaused = true;
     timeBtnPause.innerText = "Resume";
-    body.style.backgroundColor = "indianred";
+    body.style.backgroundColor = "rgb(186, 73, 73)";
+    taskContainer.style.display = "block";
+    addTaskBtn.style.display = "block";
+    title.style.display = "block";
+    timeBtnPause.style.background = "white";
+    timeBtnPause.style.borderRadius = "5px";
+    timeBtnPause.style.color = "indianred"
   }
 
   function resumeCountdown() {
     isPaused = false;
     timeBtnPause.innerText = "Pause";
     body.style.backgroundColor = "black";
+    taskContainer.style.display = "none";
+    addTaskBtn.style.display = "none";
+    title.style.display = "none";
+    timeBtnPause.style.background = "transparent";
+    timeBtnPause.style.color = "white";
   }
 
   //JSON of tasks made in object form
@@ -234,7 +261,7 @@ function formatTime(seconds) {
       }
 
       const deleteButton = document.createElement("button");
-      deleteButton.innerText = "del";
+      deleteButton.innerText = "X";
       deleteButton.id = `button-${Date.now()}`;
 
       deleteButton.addEventListener('click',e =>{
@@ -301,15 +328,21 @@ function formatTime(seconds) {
   }
 
 
+  addTaskBtn.addEventListener('click', function(){
+    addTaskPanel.style.display = "flex";
+    addTaskBtn.style.display = "none";
+  });
 
+  cancelCreation.addEventListener('click',function(){
+    addTaskPanel.style.display = "none";
+    addTaskBtn.style.display = "block";
+
+  })
+
+  createTask.addEventListener('click', addTask);
+  
   window.addEventListener('DOMContentLoaded', () => {
     taskList.forEach(renderTask)
   })
-
-  addTaskBtn.addEventListener('click', addTask);
-  taskInput.addEventListener('keypress', e => {
-    if (e.key === 'Enter') addTask();
-  });
-  
   
 
