@@ -217,7 +217,7 @@ p{
 }
 
 #addTaskBtn{
-    width: 98%;
+    width: 460px;
     height: 70px;
     background: transparent;
     color: white;
@@ -304,7 +304,11 @@ p{
     }
 
     .settings-screen{
-        width: 350px;
+        width: 90%;
         
+    }
+
+    #addTaskBtn{
+        width: 98%;
     }
 }

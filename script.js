@@ -216,7 +216,7 @@ function formatTime(seconds) {
     isPaused = true;
     timeBtnPause.innerText = "Resume";
     body.style.backgroundColor = "rgb(186, 73, 73)";
-    taskContainer.style.display = "block";
+    taskContainer.style.display = "flex";
     addTaskBtn.style.display = "block";
     title.style.display = "block";
     timeBtnPause.style.background = "white";
