@@ -133,7 +133,7 @@ function formatTime(seconds) {
 
   settings.addEventListener("click", function () {
     settingsScreen.style.display = "block";
-    overlay.style.display = 'block';
+    overlay.style.display = 'flex';
   });
 
   exitSettingsButton.addEventListener("click", function () {

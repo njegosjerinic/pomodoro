@@ -8,22 +8,76 @@
     <title>Pomodoro</title>
 </head>
 <body>
-    <div id="overlay" class="overlay"></div>
-    <div class="settings-screen">         
-        <div class="exit-container">
-            <button id="exit-settings">X</button>
-        </div>
-        <div class="input">
-            <div class="input-box">
-                <p>Pomodoro</p>
-                <input type="number" id="timeInput">
+    <div id="overlay" class="overlay">
+        <div class="settings-screen">         
+            <div class="exit-container">
+                <h3>SETTINGS</h3>
+                <button id="exit-settings">X</button>
             </div>
-            <div class="input-box">
-                <p>Rest</p>
-                <input type="number" id="timeRestInput">
+            <div class="time-input">
+                <div class="input-title">
+                    <h3>Timer</h3>
+                    <strong>Time(minutes)</strong>
+                </div>
+                <div class="inputs-container">
+                    <div class="input-box">
+                        <p>Pomodoro</p>
+                        <input type="number" id="timeInput">
+                    </div>
+                    <div class="input-box">
+                        <p>Break</p>
+                        <input type="number" id="timeRestInput">
+                    </div>
+                    <div class="input-box">
+                        <p>Long Break</p>
+                        <input type="number" id="longBreakTimeInput">
+                    </div>
+                </div>
+                <div class="timer-toggles">
+                    <div class="auto-breaks">
+                        <strong>Auto Start Breaks</strong>
+                        <label class="switch">
+                            <input type="checkbox" name="" id="">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="auto-start-pomodoros">
+                        <strong>Auto Start Pomodoros</strong>
+                        <label class="switch">
+                            <input type="checkbox" name="" id="">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="long-break-interval">
+                        <strong>Long Break Intervals</strong>
+                        <input type="number">
+                    </div>
+                </div>
             </div>
-            <div class="button-container">
-                <button id="inputTime">OK</button>
+            <div class="task-settings">
+                <div class="input-title">
+                    <h3>TASK</h3>
+                </div>
+                <div class="auto-check-tasks">
+                    <strong>Auto Checks Tasks</strong>
+                    <label class="switch">
+                            <input type="checkbox" name="" id="">
+                            <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="auto-switch-tasks">
+                    <strong>Auto Switch Tasks</strong>
+                    <label class="switch">
+                            <input type="checkbox" name="" id="">
+                            <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="theme-settings">
+                <div></div>
+            </div>
+            <div class="input-button-container">
+                    <button id="inputTime">OK</button>
             </div>
         </div>
     </div>
