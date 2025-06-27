@@ -22,15 +22,15 @@
                 <div class="inputs-container">
                     <div class="input-box">
                         <p>Pomodoro</p>
-                        <input type="number" id="timeInput">
+                        <input type="number" id="timeInput" value="30">
                     </div>
                     <div class="input-box">
                         <p>Break</p>
-                        <input type="number" id="timeRestInput">
+                        <input type="number" id="timeRestInput" value="10">
                     </div>
                     <div class="input-box">
                         <p>Long Break</p>
-                        <input type="number" id="longBreakTimeInput">
+                        <input type="number" id="longBreakTimeInput" value="25">
                     </div>
                 </div>
                 <div class="timer-toggles">
@@ -73,21 +73,85 @@
                     </label>
                 </div>
             </div>
+            <div class="sound-settings">
+                <div class="input-title">
+                    <h3>SOUND</h3>
+                </div>
+                <div class="alarm-settings">
+                    <strong>Alarm Sound</strong>
+                    <div class="alarm-slider-container">
+                        <select name="alarm-sounds" id="alarmSounds">
+                            <option value="kitchen">Kitchen</option>
+                            <option value="bell">Bell</option>
+                        </select>
+                        <input type="range" min="1" max="100" value="50" class="alarm-slider">
+                        <div class="repeat-alarm-container">
+                            <span>repeat</span>
+                            <input type="number" class="repeat-alarm">
+                        </div>
+                    </div>
+                </div>
+                <div class="ticking-settings">
+                    <strong>Ticking Sound</strong>
+                    <div class="ticking-slider-container">
+                        <select name="ticking-sound" id="tickingSounds">
+                            <option value="none">None</option>
+                            <option value="ticking-fast">Ticking Fast</option>
+                            <option value="ticking-slow">Ticking Slow</option>
+                        </select>
+                        <input type="range" min="1" max="100" value="50" class="ticking-slider">
+                    </div>
+                </div>
+            </div>
             <div class="theme-settings">
-                <div></div>
+                <div class="input-title">
+                    <h3>THEME</h3>
+                </div>
+                <div class="color-themes">
+                    <strong>Color Themes</strong>
+                    <div class="bckg-colors">
+                        <div class="working-color-selection" id="workingColor"></div>
+                        <div class="shortbreak-color-selection" id="shortbreakColor"></div>
+                        <div class="longbreak-color-selection" id="longbreakColor"></div>
+                    </div>
+                </div>
+                <div class="hour-format">
+                    <strong>Hour Format</strong>
+                    <select name="hour-format-selection" id="hourFormatSelection">
+                        <option value="24-hour">24-hour</option>
+                        <option value="12-hour">12-hour</option>
+                    </select>
+                </div>
+                <div class="dark-mode">
+                    <strong>Dark Mode when running</strong>
+                    <label class="switch">
+                            <input type="checkbox" name="" id="">
+                            <span class="slider round"></span>
+                    </label>
+                </div>
             </div>
             <div class="input-button-container">
                     <button id="inputTime">OK</button>
             </div>
         </div>
     </div>
+    <header>
+            <div class="header-content">
+                <h1>Pomodoro</h1>
+                <button id="settings">settings</button>  
+            </div>
+            <div class="pomodoro-progress">
+                <div class="progress"></div>
+            </div>
+    </header>
     <div class="pomodoro-layout">
-        <header>
-            <h1>POMODORO TIMER</h1>
-            <button id="settings">settings</button>
-        </header>
         <div class="timer-container">
             <div class="timer-background">
+                <div class="state-buttons">
+                    <button id="pomodoroMode">Pomodoro</button>
+                    <button id="shortBrake">Short Brake</button>
+                    <button id="longBrake">Long Brake</button>
+                </div>
                 <div id="countdownDisplay">00:00</div>
                 <div class="controllTime">
                     <button id="timeBtnStart">Start</button>
@@ -97,6 +161,9 @@
             </div>
         </div>
         <div class="pomodorosCounter" id="pomodorosCounter">#1</div>
+        <div class="current-project-title-container">
+            <p id="currentProject">srpski</p>
+        </div>
         <div class="task-container" id="container">
             <div class="taskForm">
                 <button id="addTaskBtn">+ Add Task</button>
@@ -114,7 +181,7 @@
                 
             </div>
             <div id ="title">
-                <h1>TASKS</h1>
+                <h3>Tasks</h3>
             </div>
         </div>
     </div>

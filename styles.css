@@ -1,32 +1,49 @@
 body{
     font-family: 'Quicksand',Arial,sans-serif;
     background-color: rgb(186, 73, 73);
-    display: flex;
+    margin: 0;
 
 }
 
 .pomodoro-layout{
+    padding: 0px 12px;
+    width: 600px;
     margin: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
 header{
-    color: white;
-    display: flex;
-    justify-content: space-between;
+    padding: 0px 12px;
     width: 600px;
-    border-bottom: 1px solid white;
+    margin: auto;
+}
+
+.header-content{
+    background-color: inherit;
+    width: 100%;
+    height: 60px;
+    display: flex;
+    -webkit-box-pack: justify;
+    justify-content: space-between;
+    -webkit-box-align: center;
+    align-items: center;
+    color: white;
 }
 
 header h1{
     margin: 0;
+    font-size: x-large;
 }
 
 p{
     margin: 0;
 }
+
+.pomodoro-progress{
+    height: 2px;
+    width: 100%;
+    background: rgba(82, 4, 4, 0.171);
+}
+
 
 .timer-container{
     display: flex;
@@ -43,7 +60,7 @@ p{
     justify-content: space-around;
     width: 500px;
     height: 300px;
-    margin-top: 50px;
+    margin-top: 45px;
     border-radius: 1%;
 }
 
@@ -55,6 +72,9 @@ p{
 
 .controllTime{
     display: flex;
+    width: 60%;
+    margin-left: 20%;
+    gap: 20px;
 }
 
 #timeBtnPause{
@@ -67,9 +87,14 @@ p{
 
 .pomodorosCounter{
     display: flex;
-    height: 100px;
+    height: 40px;
     justify-content: center;
-    align-items: center;
+    align-items: flex-end;
+    color: lightgray;
+}
+
+.current-project-title-container{
+    text-align: center;
     color: white;
 }
 
@@ -79,6 +104,12 @@ p{
     align-items: center;
     color: white;
     width: 100%;
+}
+
+#title{
+    width: 76%;
+    border-bottom: 1px solid white;
+    margin-bottom:20px;
 }
 
 #container-for-tasks{
@@ -99,6 +130,7 @@ p{
     align-items: center;
     justify-content: space-between;
     transition: 0.3s;
+    cursor: pointer;
 }
 
 .task:hover{
@@ -126,8 +158,12 @@ p{
     background-color:rgba(255, 255, 255, 0.1);
     color: white;
     border: 0;
-    margin-bottom: 10px;
+    margin: 10px;
     transition: 0.2s;
+    cursor: pointer;
+    height: 35px;
+    border-radius: 5px;
+    padding: 0px 15px;
 }
 
 #settings:hover{
@@ -138,9 +174,10 @@ p{
     z-index: 100;
     display: none;
     height: fit-content;
-    width: 450px;
+    width: 400px;
     background: white;
     border-radius: 10px;
+    margin-top: 50px;
 }
 
 .settings-screen p {
@@ -167,6 +204,7 @@ p{
     right: 2%;
     top: 25%;
     color: gray;
+    cursor: pointer;
 }
 
 .overlay {
@@ -177,6 +215,7 @@ p{
     background: rgba(0, 0, 0, 0.5);
     z-index: 100;      
     justify-content: center;
+    overflow: scroll;
   }
 
 
@@ -212,13 +251,6 @@ p{
     background: #f0f0f0;
     border-radius: 5px;
     padding: 10px;
-}
-
-.input-button-container{
-    width: 100%;
-    height: 50px;
-    display: flex;
-    align-items: center;
 }
 
 .switch {
@@ -281,6 +313,10 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
+.timer-toggles{
+    border-bottom: 1px solid lightgray;
+}
+
 .task-settings{
     margin: 20px;
 }
@@ -288,13 +324,282 @@ input:checked + .slider:before {
 .auto-breaks{
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
 }
 
 .auto-start-pomodoros{
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
 }
 
+.long-break-interval{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0 30px 0;
+}
+
+.long-break-interval input{
+    width: 60px;
+    height: 25px;
+    border: 0;
+    background: #f0f0f0;
+    border-radius: 5px;
+    padding:10px;
+}
+
+.auto-check-tasks{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.auto-switch-tasks{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.sound-settings{
+    margin: 20px;
+}
+
+.alarm-settings{
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.alarm-slider-container{
+    display: flex;
+    flex-direction: column;
+}
+
+#alarmSounds{
+    width: 150px;
+    height: 40px;
+    border: 0;
+    background: #f0f0f0;
+    border-radius: 5px;
+    padding:10px;
+    color: gray;
+}
+
+.alarm-slider{
+    margin:30px 0;
+    -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 5px;  
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.alarm-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%; 
+  background: white;
+  box-shadow: 1px 1px 3px black;
+  cursor: pointer;
+}
+
+.alarm-slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #04AA6D;
+  cursor: pointer;
+}
+
+.alarm-slider-container .repeat-alarm{
+    width: 40px;
+    height: 25px;
+    border: 0;
+    background: #f0f0f0;
+    border-radius: 5px;
+    padding:10px;
+}
+
+.repeat-alarm-container{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.ticking-settings{
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.ticking-slider-container{
+    display: flex;
+    flex-direction: column;
+}
+
+#tickingSounds{
+    width: 150px;
+    height: 40px;
+    border: 0;
+    background: #f0f0f0;
+    border-radius: 5px;
+    padding:10px;
+    color: gray;
+}
+
+.ticking-slider{
+    margin:30px 0;
+    -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 5px;  
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.ticking-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%; 
+  background: white;
+  box-shadow: 1px 1px 3px black;
+  cursor: pointer;
+}
+
+.ticking-slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+}
+
+.theme-settings{
+    margin: 20px;
+}
+
+.color-themes{
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+    align-items: center;
+}
+
+.bckg-colors{
+    display: flex;
+    height: 25px;
+    width: 100px;
+    gap: 0.7rem;
+}
+
+
+.working-color-selection{
+    cursor: pointer;
+    user-select: none;
+    background-color: rgb(186, 73, 73);
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 0.4rem;
+}
+
+.shortbreak-color-selection{
+    cursor: pointer;
+    user-select: none;
+    background-color: rgb(56, 133, 138);
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 0.4rem;
+}
+
+.longbreak-color-selection{
+    cursor: pointer;
+    user-select: none;
+    background-color: rgb(57, 112, 151);
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 0.4rem;
+}
+
+.hour-format{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+}
+
+#hourFormatSelection{
+    width: 150px;
+    height: 40px;
+    border: 0;
+    background: #f0f0f0;
+    border-radius: 5px;
+    padding:10px;
+    color: gray;
+}
+
+.dark-mode{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;   
+}
+
+.input-button-container{
+    padding: 14px 20px;
+    text-align: right;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    background-color: rgb(239, 239, 239);
+}
+
+#inputTime{
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 2px;
+    color: white;
+    opacity: 0.9;
+    font-size: 14px;
+    padding: 8px 12px;
+    min-width: 70px;
+    background-color: rgb(34, 34, 34);
+    border: 2px solid rgb(34, 34, 34);
+    display: inline-block;
+}
+
+.state-buttons button{
+    background: transparent;
+    border: 0;
+    color: white;
+    font-size: medium;
+    padding: 5px;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.state-buttons button:active{
+    background: rgb(116, 51, 51);
+}
 
 #timeBtnStart{
     height: 50px;
@@ -304,6 +609,7 @@ input:checked + .slider:before {
     border-radius: 5px;
     color: indianred;
     font-size: 25px;
+    cursor: pointer;
 }
 
 #timeBtnPause{
@@ -313,6 +619,7 @@ input:checked + .slider:before {
     color: white;
     border: 0;
     font-size: 25px;
+    cursor: pointer;
 }
 
 #timeBtnFF{
@@ -320,6 +627,7 @@ input:checked + .slider:before {
     color: white;
     border: 0;
     font-size: 25px;
+    cursor: pointer;
 }
 
 .taskForm{
@@ -337,6 +645,7 @@ input:checked + .slider:before {
     font-size: large;
     border: 1px solid white;
     border-radius: 10px;
+    cursor: pointer;
 }
 
 #addTaskPanel{
@@ -386,6 +695,7 @@ input:checked + .slider:before {
     height: 30px;
     width: 50px;
     border-radius: 5px;
+    cursor: pointer;
 }
 
 .none{
