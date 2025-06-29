@@ -133,15 +133,13 @@ p{
     cursor: pointer;
 }
 
-.task:hover{
-    background: lightgray;
-}
 
 .task button{
     font-size: large;
     background: white;
     border: 0;
     color: gray;
+    cursor: pointer;
 }
 
 .task p{

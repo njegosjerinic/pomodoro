@@ -250,6 +250,11 @@ function formatTime(seconds) {
       taskDiv.dataset.id = id;
       taskDiv.className = "task"
 
+      let taskContent = document.createElement('div');
+      taskContent.className = "task-content"
+      taskContent.style.display = "flex";
+      taskContent.style.gap = "10px";
+
       const taskDesc = document.createElement("p");
       taskDesc.innerText = name;
 
@@ -261,8 +266,9 @@ function formatTime(seconds) {
       }
 
       const deleteButton = document.createElement("button");
-      deleteButton.innerText = "X";
+      deleteButton.innerHTML = "&vellip;";
       deleteButton.id = `button-${Date.now()}`;
+      deleteButton.style.border = "1px solid gray"
 
       deleteButton.addEventListener('click',e =>{
         e.stopPropagation();
@@ -288,7 +294,9 @@ function formatTime(seconds) {
         saveTasks();
       })
 
-      taskDiv.append(taskDesc, taskTime, deleteButton)
+      taskContent.append(taskTime, deleteButton)
+
+      taskDiv.append(taskDesc, taskContent)
       taskContainer.appendChild(taskDiv)
       
   }
