@@ -133,13 +133,28 @@ p{
     cursor: pointer;
 }
 
+.task-content{
+    align-items: center;
+}
+
 
 .task button{
     font-size: large;
     background: white;
-    border: 0;
     color: gray;
     cursor: pointer;
+    width: 30px;
+    margin: 5px;
+    height: fit-content;
+    font-size: x-large;
+    cursor: pointer;
+    border: 1px solid rgb(223, 223, 223);
+    border-radius: 4px;
+    background-color: white;
+}
+
+.task button:hover{
+    background: lightgray;
 }
 
 .task p{
@@ -176,6 +191,10 @@ p{
     background: white;
     border-radius: 10px;
     margin-top: 50px;
+}
+
+.settings-screen select{
+    cursor: pointer;
 }
 
 .settings-screen p {

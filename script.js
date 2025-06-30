@@ -1,172 +1,73 @@
-const tasks = document.querySelectorAll("task");
-const settings = document.getElementById("settings");
-const body = document.getElementsByTagName("BODY")[0];
-const timeInput = document.getElementById("timeInput");
+// --- DOM Elements ---
+const body = document.body;
+const countdownDisplay = document.getElementById("countdownDisplay");
+const title = document.getElementById("title");
+const taskContainer = document.getElementById("container-for-tasks");
 const taskInput = document.getElementById("taskInput");
+const timeInput = document.getElementById("timeInput");
+const timeRestInput = document.getElementById("timeRestInput");
+const timeLongRestInput = document.getElementById("longBreakTimeInput");
+const longBreakInput = document.getElementById("longBreakTimeInput");
+const amountOfPomodorosInput = document.getElementById("amountOfPomodorosInput");
+const tasks = document.querySelectorAll(".task");
+const pomodorosCounter = document.getElementById("pomodorosCounter");
+const longBrakeIntervalInput = document.getElementById("longBrakeIntervalInput");
+
+// Buttons
+const timeBtnStart = document.getElementById("timeBtnStart");
+const timeBtnPause = document.getElementById("timeBtnPause");
 const timeBtnFF = document.getElementById("timeBtnFF");
 const addTaskBtn = document.getElementById("addTaskBtn");
-const timeBtnPause = document.getElementById("timeBtnPause");
-const timeBtnStart = document.getElementById("timeBtnStart");
-const timeRestInput = document.getElementById("timeRestInput");
 const exitSettingsButton = document.getElementById("exit-settings");
-const countdownDisplay = document.getElementById("countdownDisplay");
-const taskContainer = document.getElementById("container-for-tasks");
-const pomodorosCounter = document.getElementById("pomodorosCounter");
-const settingsScreen = document.getElementsByClassName("settings-screen")[0];
-const amountOfPomodorosInput = document.getElementById("amountOfPomodorosInput");
-const createTask = document.getElementById('createTask');
-const cancelCreation = document.getElementById('cancelCreation');
-const addTaskPanel = document.getElementById('addTaskPanel');
-const input = document.getElementById('inputTime');
-const overlay = document.getElementById('overlay');
-const audio = new Audio("audiomass-output.mp3");
-const title = document.getElementById("title");
+const createTask = document.getElementById("createTask");
+const cancelCreation = document.getElementById("cancelCreation");
+const inputBtn = document.getElementById('inputTimeBtn');
+const workModeBtn = document.getElementById("workModeBtn");
+const shortBrakeModeBtn = document.getElementById("shortBrakeBtn");
+const longBrakeModeBtn = document.getElementById("longBrakeBtn");
 
+// Panels and Screens
+const settingsScreen = document.querySelector(".settings-screen");
+const addTaskPanel = document.getElementById("addTaskPanel");
+const overlay = document.getElementById("overlay");
+
+// Audio
+const audio = new Audio("audiomass-output.mp3");
+
+// --- App State ---
 let countdown;
 let restCountdown;
+let longRestCountdown;
 let isPaused = false;
 let isWorking = true;
 let numberOfTasks = 0;
 let pomodosCounter = 1;
+let taskList = JSON.parse(localStorage.getItem("tasks")) || [];
+let baseWorkingTimer = 30;
 
-
+//==============UTILITIES==================//
+//This takes input that has been translated to seconds and translates it back to minutes and seconds
 function formatTime(seconds) {
   const minutes = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
 }
 
-  //Load saved values from local storage
-  timeInput.value = localStorage.getItem("timeInput") || "";
-  timeRestInput.value = localStorage.getItem("timeRestInput");
-
-  
-
-  //This is used to update the display value on input 
-  input.addEventListener("click", function () {
-    const duration = getInput(timeInput.value);
-    if (duration !== null) {
-      updateTimer(duration);
-      settingsScreen.style.display = "none";
-      overlay.style.display = "none";
-    }
-  });
-
-  //Begining value that is hown on the screen Its below the localStorage because it uses it
-  countdownDisplay.value = updateTimer(parseInt(timeInput.value * 60));
-
-
-  //Save input values to local storage on change
-  timeInput.addEventListener("input", function () {
-    localStorage.setItem("timeInput", timeInput.value);
-  });
-
-  timeRestInput.addEventListener("input", function () {
-    localStorage.setItem("timeRestInput", timeRestInput.value);
-  });
-
-  //Getting the input for work duration
-  function getInput(input) {
-    const duration = parseInt(input)
-    if (isNaN(duration) || duration <= 0) {
-      alert("Please enter a right amount of minutes for work");
-      return null;
-    }
-    return input * 60;
+//Gets input and transforms it into seconds
+function getInput(input) {
+  const duration = parseInt(input)
+  if (isNaN(duration) || duration <= 0) {
+    alert("Please enter a right amount of minutes for work");
+    return null;
   }
-
-  //Timer code and all the logic about it 
- function Timer(duration,restDuration){
-  if(isWorking){
-    updateTimer(duration)
-    updatePomodorosCounter();
-    updatePomodorosCounterPerTask();
-    countdown = setInterval(function(){
-      if(!isPaused){
-        duration--;
-        updateTimer(duration)
-        working();
-      }
-
-      if(duration == 0){
-        audio.play();
-        clearInterval(countdown)
-        isWorking = false;
-        preResting();
-        updateTimer(restDuration);
-      }
-    },1000)
-  }else if(!isWorking){
-    restCountdown = setInterval(function(){
-      if(!isPaused){
-        restDuration--;
-        resting();
-        updateTimer(restDuration);
-      }
-
-      if(restDuration == 0){
-        audio.play();
-        clearInterval(restCountdown);
-        isWorking = true;
-        preWorking();
-        updateTimer(duration);
-      }
-    },1000)
-  }
- }
+  return input * 60;
+}
 
 
 
-
-  function updateTimer(time) {
-    countdownDisplay.innerText = formatTime(time);
-  }
-
-  function updatePomodorosCounter(){
-    pomodorosCounter.innerText = `#${pomodosCounter++}`;
-    taskList.forEach(task => {
-      if(task.isActive){
-        task.donePomodoros++;
-      }
-    })
-  }
-
-  settings.addEventListener("click", function () {
-    settingsScreen.style.display = "block";
-    overlay.style.display = 'flex';
-  });
-
-  exitSettingsButton.addEventListener("click", function () {
-    settingsScreen.style.display = "none";
-    overlay.style.display = 'none';
-  });
-
-  //Starting the timer
-  timeBtnStart.addEventListener("click", function () {
-    Timer(getInput(timeInput.value),getInput(timeRestInput.value));
-  });
-
-  //Actions that the Fast Foward button does 
-  timeBtnFF.addEventListener("click", function () {
-    const duration = getInput(timeInput.value);
-    const restDuration = getInput(timeRestInput.value);
-    
-    if (isWorking) {
-      clearInterval(countdown);
-      updateTimer(restDuration);
-      preResting();
-      isWorking = false;
-    } else{
-      clearInterval(restCountdown);
-      updateTimer(duration);
-      preWorking();
-      isWorking = true;
-    }
-  });
-
-  //These are the states of the timer in the app
+//These are the states of the timer in the app
   function preWorking(){
-    body.style.backgroundColor = "indianred";
+    body.style.backgroundColor = "rgb(186, 73, 73)";
     timeBtnStart.style.display = "block";
     timeBtnFF.style.display = "none";
     timeBtnPause.style.display = "none";
@@ -175,6 +76,16 @@ function formatTime(seconds) {
   }
 
   function working() {
+    body.style.backgroundColor = "rgb(186, 73, 73)";
+    timeBtnStart.style.display = "none";
+    timeBtnFF.style.display = "block";
+    timeBtnPause.style.display = "block";
+    taskContainer.style.display = "block";
+    addTaskBtn.style.display = "block";
+    title.style.display = "block";
+  }
+
+  function showWorkDarkModeUI(){
     body.style.backgroundColor = "black";
     timeBtnStart.style.display = "none";
     timeBtnFF.style.display = "block";
@@ -202,16 +113,7 @@ function formatTime(seconds) {
     addTaskBtn.style.display = "block";
   }
 
-  //Code for pausing
-
-  timeBtnPause.addEventListener("click", function () {
-    if (isPaused) {
-      resumeCountdown();
-    } else {
-      pauseCountdown();
-    }
-  });
-
+  //States that have to do with pausing
   function pauseCountdown() {
     isPaused = true;
     timeBtnPause.innerText = "Resume";
@@ -227,16 +129,74 @@ function formatTime(seconds) {
   function resumeCountdown() {
     isPaused = false;
     timeBtnPause.innerText = "Pause";
-    body.style.backgroundColor = "black";
-    taskContainer.style.display = "none";
-    addTaskBtn.style.display = "none";
-    title.style.display = "none";
+    body.style.backgroundColor = "rgb(186, 73, 73)";
+    taskContainer.style.display = "block";
+    addTaskBtn.style.display = "block";
+    title.style.display = "block";
     timeBtnPause.style.background = "transparent";
     timeBtnPause.style.color = "white";
   }
 
-  //JSON of tasks made in object form
-  let taskList = JSON.parse(localStorage.getItem("tasks")) || [];
+  //Load saved values from local storage
+  timeInput.value = localStorage.getItem("timeInput") || "25";
+  timeRestInput.value = localStorage.getItem("timeRestInput") || "10";
+  timeLongRestInput.value = localStorage.getItem("timeLongRestInput") || "25";
+
+  //Begining value that is shown on the screen Its below the localStorage because it uses it
+  countdownDisplay.value = updateTimer(parseInt(timeInput.value * 60));
+
+  //Timer code and all the logic about it 
+ function Timer(duration,restDuration,longRestDuration){
+  if(isWorking){
+    updateTimer(duration)
+    countdown = setInterval(function(){
+      if(!isPaused){
+        duration--;
+        updateTimer(duration)
+        working();
+      }
+
+      if(duration == 0){
+        audio.play();
+        clearInterval(countdown)
+        isWorking = false;
+        preResting();
+        updateTimer(restDuration);
+        updatePomodorosCounter();
+        updatePomodorosCounterPerTask();
+      }
+    },1000)
+  }else if(!isWorking){
+    restCountdown = setInterval(function(){
+      if(!isPaused){
+        restDuration--;
+        resting();
+        updateTimer(restDuration);
+      }
+
+      if(restDuration == 0){
+        audio.play();
+        clearInterval(restCountdown);
+        isWorking = true;
+        preWorking();
+        updateTimer(duration);
+      }
+    },1000)
+  }
+ }
+
+  function updateTimer(time) {
+    countdownDisplay.innerText = formatTime(time);
+  }
+
+  function updatePomodorosCounter(){
+    pomodorosCounter.innerText = `#${pomodosCounter++}`;
+    taskList.forEach(task => {
+      if(task.isActive){
+        task.donePomodoros++;
+      }
+    })
+  }
 
   function saveTasks(){
     localStorage.setItem('tasks', JSON.stringify(taskList))
@@ -268,7 +228,6 @@ function formatTime(seconds) {
       const deleteButton = document.createElement("button");
       deleteButton.innerHTML = "&vellip;";
       deleteButton.id = `button-${Date.now()}`;
-      deleteButton.style.border = "1px solid gray"
 
       deleteButton.addEventListener('click',e =>{
         e.stopPropagation();
@@ -334,6 +293,71 @@ function formatTime(seconds) {
   // 2) re‑render each task
     taskList.forEach(renderTask);
   }
+
+
+
+
+  //================================================================EVENT LISTENERS============================================================//
+  settings.addEventListener("click", function () {
+  settingsScreen.style.display = "block";
+  overlay.style.display = 'flex';
+});
+
+exitSettingsButton.addEventListener("click", function () {
+  settingsScreen.style.display = "none";
+  overlay.style.display = 'none';
+});
+
+//This is used to update the display value on input 
+inputBtn.addEventListener("click", function () {
+  const duration = getInput(timeInput.value);
+  if (duration !== null) {
+    updateTimer(duration);
+    settingsScreen.style.display = "none";
+    overlay.style.display = "none";
+  }
+});
+
+//Save input values when Ok is clicked in the settings menu 
+inputBtn.addEventListener('click', function(){
+  localStorage.setItem("timeInput", timeInput.value);
+  localStorage.setItem("timeRestInput", timeRestInput.value);
+  localStorage.setItem("timeLongRestInput", timeLongRestInput.value);
+});
+
+//Starting the timer
+timeBtnStart.addEventListener("click", function () {
+  Timer(getInput(timeInput.value),getInput(timeRestInput.value));
+});
+
+//Actions that the Fast Foward button does 
+timeBtnFF.addEventListener("click", function () {
+  const duration = getInput(timeInput.value);
+  const restDuration = getInput(timeRestInput.value);
+    
+  if (isWorking) {
+    clearInterval(countdown);
+    updateTimer(restDuration);
+    preResting();
+    isWorking = false;
+  } else{
+    clearInterval(restCountdown);
+    updateTimer(duration);
+    preWorking();
+    isWorking = true;
+  }
+});
+
+  
+  //Code for pausing
+
+  timeBtnPause.addEventListener("click", function () {
+    if (isPaused) {
+      resumeCountdown();
+    } else {
+      pauseCountdown();
+    }
+  });
 
 
   addTaskBtn.addEventListener('click', function(){
