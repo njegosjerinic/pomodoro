@@ -585,7 +585,7 @@ input:checked + .slider:before {
     background-color: rgb(239, 239, 239);
 }
 
-#inputTime{
+#inputTimeBtn{
     -webkit-box-align: center;
     align-items: center;
     -webkit-box-pack: center;

@@ -61,14 +61,14 @@
                 <div class="auto-check-tasks">
                     <strong>Auto Checks Tasks</strong>
                     <label class="switch">
-                            <input type="checkbox" name="" id="">
+                            <input type="checkbox" name="" id="autoCheckTasks">
                             <span class="slider round"></span>
                     </label>
                 </div>
                 <div class="auto-switch-tasks">
                     <strong>Auto Switch Tasks</strong>
                     <label class="switch">
-                            <input type="checkbox" name="" id="">
+                            <input type="checkbox" name="" id="autoSwitchTasks">
                             <span class="slider round"></span>
                     </label>
                 </div>
@@ -84,10 +84,10 @@
                             <option value="kitchen">Kitchen</option>
                             <option value="bell">Bell</option>
                         </select>
-                        <input type="range" min="1" max="100" value="50" class="alarm-slider">
+                        <input type="range" min="1" max="100" value="50" class="alarm-slider" id="alarmVolumeSlider">
                         <div class="repeat-alarm-container">
                             <span>repeat</span>
-                            <input type="number" class="repeat-alarm">
+                            <input type="number" class="repeat-alarm" value="1" id="repeatAlarmInput">
                         </div>
                     </div>
                 </div>
@@ -99,7 +99,8 @@
                             <option value="ticking-fast">Ticking Fast</option>
                             <option value="ticking-slow">Ticking Slow</option>
                         </select>
-                        <input type="range" min="1" max="100" value="50" class="ticking-slider">
+                        <input type="range" min="1" max="100" value="50" class="ticking-slider" id="tickingVolumeSlider">
+                        <p id="tickingValue"></p>
                     </div>
                 </div>
             </div>
@@ -125,7 +126,7 @@
                 <div class="dark-mode">
                     <strong>Dark Mode when running</strong>
                     <label class="switch">
-                            <input type="checkbox" name="" id="">
+                            <input type="checkbox" name="" id="darkMode">
                             <span class="slider round"></span>
                     </label>
                 </div>
@@ -162,7 +163,7 @@
         </div>
         <div class="pomodorosCounter">#<p id="pomodorosCounter">1</p></div>
         <div class="current-project-title-container">
-            <p id="currentProject">srpski</p>
+            <p id="currentProject">untitled</p>
         </div>
         <div class="task-container" id="container">
             <div class="taskForm">

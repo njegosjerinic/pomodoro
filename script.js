@@ -3,17 +3,23 @@ const body = document.body;
 const countdownDisplay = document.getElementById("countdownDisplay");
 const title = document.getElementById("title");
 const taskContainer = document.getElementById("container-for-tasks");
-const taskInput = document.getElementById("taskInput");
-const timeInput = document.getElementById("timeInput");
-const timeRestInput = document.getElementById("timeRestInput");
-const timeLongRestInput = document.getElementById("longBreakTimeInput");
+
 const longBreakInput = document.getElementById("longBreakTimeInput");
 const amountOfPomodorosInput = document.getElementById(
   "amountOfPomodorosInput"
 );
 const tasks = document.querySelectorAll(".task");
 const pomodorosCounter = document.getElementById("pomodorosCounter");
+
+const currentProject = document.getElementById("currentProject");
+
+//  Inputs
+const taskInput = document.getElementById("taskInput");
+const timeInput = document.getElementById("timeInput");
+const timeRestInput = document.getElementById("timeRestInput");
+const timeLongRestInput = document.getElementById("longBreakTimeInput");
 const longBrakeIntervalInput = document.getElementById("longBreakIntervalInput");
+const repeatAlarmInput = document.getElementById("repeatAlarmInput");
 
 // Buttons
 const timeBtnStart = document.getElementById("timeBtnStart");
@@ -27,6 +33,20 @@ const inputBtn = document.getElementById("inputTimeBtn");
 const workModeBtn = document.getElementById("workModeBtn");
 const shortBrakeModeBtn = document.getElementById("shortBrakeBtn");
 const longBrakeModeBtn = document.getElementById("longBrakeBtn");
+
+//  Checkboxes
+const autoStartBreaksCheck = document.getElementById("autoStartBreaksSlider");
+const autoStartPomodorosCheck = document.getElementById("autoStartPomodorosSlider");
+const autoCheckTasksCheck = document.getElementById("autoCheckTasks");
+const autoSwitchTasksCheck = document.getElementById("autoSwitchTasks");
+const darkModeCheck = document.getElementById("darkMode");
+const alarmSoundsDropDown = document.getElementById("alarmSounds");
+const tickingSoundsDropDown = document.getElementById("tickingSounds");
+
+//  Sliders
+const alarmVolumeSlider = document.getElementById("alarmVolumeSlider");
+const tickingVolumeSlider = document.getElementById("tickingVolumeSlider");
+const tickingValue = document.getElementById("tickingValue");
 
 // Panels and Screens
 const settingsScreen = document.querySelector(".settings-screen");
@@ -226,10 +246,10 @@ function updateRestInterval(){
 //Begining value that is shown on the screen Its below the localStorage because it uses it
 countdownDisplay.value = updateTimer(parseInt(timeInput.value * 60));
 
-//Timer code and all the logic about it
-function Timer(duration, restDuration, longRestDuration) {
-  if (isWorking) {
-    updateTimer(duration);
+//Spliting the timer function into workTimer(), restTimer() and longRestTimer()
+
+function startWorkTimer(duration, restDuration, longRestDuration){
+  updateTimer(duration);
     countdown = setInterval(function () {
       if (!isPaused) {
         duration--;
@@ -251,25 +271,10 @@ function Timer(duration, restDuration, longRestDuration) {
         
       }
     }, 1000);
-  } else if (!isWorking) {
-    if(updateRestInterval() || isRestingLong){
-      longRestCountdown = setInterval(function () {
-        if (!isPaused) {
-          longRestDuration--;
-          restingLong();
-          updateTimer(longRestDuration);
-        }
+}
 
-        if (longRestDuration == 0) {
-          audio.play();
-          clearInterval(restCountdown);
-          isWorking = true;
-          preWorking();
-          updateTimer(duration);
-        }
-      }, 1000);
-    }else{
-      restCountdown = setInterval(function () {
+function startRestTimer(duration, restDuration, longRestDuration){
+  restCountdown = setInterval(function () {
         if (!isPaused) {
           restDuration--;
           restingShort();
@@ -284,8 +289,24 @@ function Timer(duration, restDuration, longRestDuration) {
           updateTimer(duration);
         }
       }, 1000);
-    }
-  }
+}
+
+function startLongRestTimer(duration, restDuration, longRestDuration){
+  longRestCountdown = setInterval(function () {
+        if (!isPaused) {
+          longRestDuration--;
+          restingLong();
+          updateTimer(longRestDuration);
+        }
+
+        if (longRestDuration == 0) {
+          audio.play();
+          clearInterval(restCountdown);
+          isWorking = true;
+          preWorking();
+          updateTimer(duration);
+        }
+      }, 1000);
 }
 
 function updateTimer(time) {
@@ -331,34 +352,31 @@ function renderTask(task) {
     taskDiv.className = "task active";
   }
 
-  const deleteButton = document.createElement("button");
-  deleteButton.innerHTML = "&vellip;";
-  deleteButton.id = `button-${Date.now()}`;
+  const taskSettingsButton = document.createElement("button");
+  taskSettingsButton.innerHTML = "&vellip;";
+  taskSettingsButton.id = `button-${Date.now()}`;
 
-  deleteButton.addEventListener("click", (e) => {
+  taskSettingsButton.addEventListener("click", (e) => {
     e.stopPropagation();
-    taskContainer.removeChild(taskDiv);
-    taskList = taskList.filter((t) => t.id !== id);
-    saveTasks();
+    taskDiv.style.height = "300px"
   });
 
   taskDiv.addEventListener("click", () => {
     if (taskDiv.classList.contains("active")) return;
 
-    document
-      .querySelectorAll(".task.active")
-      .forEach((el) => el.classList.remove("active"));
+    document.querySelectorAll(".task.active").forEach((el) => el.classList.remove("active"));
 
     taskDiv.classList.add("active");
 
     taskList.forEach((t) => (t.isActive = false));
     task.isActive = true;
-
+    currentProject.innerText = task.name;
+    localStorage.setItem("currentProject", currentProject.innerText)
     taskTime.innerText = `${task.donePomodoros} / ${pomodorosToDo}`;
     saveTasks();
   });
 
-  taskContent.append(taskTime, deleteButton);
+  taskContent.append(taskTime, taskSettingsButton);
 
   taskDiv.append(taskDesc, taskContent);
   taskContainer.appendChild(taskDiv);
@@ -407,34 +425,47 @@ exitSettingsButton.addEventListener("click", function () {
   overlay.style.display = "none";
 });
 
-//This is used to update the display value on input
+//  Save input values when Ok is clicked in the settings menu
 inputBtn.addEventListener("click", function () {
-  const duration = getInput(timeInput.value);
-  if (duration !== null) {
-    updateTimer(duration);
-    settingsScreen.style.display = "none";
-    overlay.style.display = "none";
-  }
-});
+  settingsScreen.style.display = "none";
+  overlay.style.display = "none";
 
-//Save input values when Ok is clicked in the settings menu
-inputBtn.addEventListener("click", function () {
+  //  Inputs
   localStorage.setItem("timeInput", timeInput.value);
   localStorage.setItem("timeRestInput", timeRestInput.value);
   localStorage.setItem("timeLongRestInput", timeLongRestInput.value);
-  localStorage.setItem("longBrakeIntervalInput", longBrakeIntervalInput.value)
+  localStorage.setItem("longBrakeIntervalInput", longBrakeIntervalInput.value);
+  localStorage.setItem("repeatAlarmInput", repeatAlarmInput.value);
+
+  //  Checkboxes
+  localStorage.setItem("autoStartBreaksSlider", autoStartBreaksCheck.checked);
+  localStorage.setItem("autoStartPomodorosSlider", autoStartPomodorosCheck.checked);
+  localStorage.setItem("autoCheckTasks", autoCheckTasksCheck.checked);
+  localStorage.setItem("autoSwitchTasks", autoSwitchTasksCheck.checked);
+  localStorage.setItem("darkMode", darkModeCheck.checked);
+  localStorage.setItem("alarmSounds", alarmSoundsDropDown.value);
+  localStorage.setItem("tickingSounds", tickingSoundsDropDown.value);
+
+  //  Sliders
+  localStorage.setItem("alarmVolumeSlider", alarmVolumeSlider.value);
+  localStorage.setItem("tickingVolumeSlider", tickingVolumeSlider.value);
+  localStorage.setItem("tickingValue", tickingVolumeSlider.value);
 });
 
-//Starting the timer
+//  Starting the timer
 timeBtnStart.addEventListener("click", function () {
-  Timer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
   if (isWorking) {
     updatePomodorosCounter();
     updatePomodorosCounterPerTask();
+    startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
+  }else if(updateRestInterval() || isRestingLong){
+    startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
+  }else{
+    startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
   }
 });
 
-//Actions that the Fast Foward button does
+//  Actions that the Fast Foward button does
 timeBtnFF.addEventListener("click", function () {
   const duration = getInput(timeInput.value);
   const restDuration = getInput(timeRestInput.value);
@@ -465,14 +496,16 @@ timeBtnFF.addEventListener("click", function () {
   }
 });
 
-//Code for pausing
+//  Code for pausing
 
 timeBtnPause.addEventListener("click", function () {
   if(isWorking){
   if (isPaused) {
     resumeCountdownWork();
+    console.log(autoStartBreaksCheck.checked)
   } else {
     pauseCountdownWork();
+    console.log(autoStartBreaksCheck.checked)
   }
   }else{
     if(updateRestInterval()){
@@ -514,7 +547,7 @@ workModeBtn.addEventListener('click', function(){
     preWorking();
     isRestingLong = false;
   }
-})
+});
 
 shortBrakeModeBtn.addEventListener('click',function(){
   if(isWorking){
@@ -527,7 +560,7 @@ shortBrakeModeBtn.addEventListener('click',function(){
     preRestingShort();
     isRestingLong = false;
   }
-})
+});
 
 longBrakeModeBtn.addEventListener('click', function(){
   isRestingLong = true;
@@ -535,22 +568,71 @@ longBrakeModeBtn.addEventListener('click', function(){
     clearInterval(countdown)
     updateTimer(getInput(longBreakInput.value))
     preRestingLong();
-          console.log(isRestingLong)
   }else if(!isWorking){
     clearInterval(restCountdown || countdown)
     updateTimer(getInput(longBreakInput.value))
     preRestingLong();
-          console.log(isRestingLong)
   }
-})
+});
+
+tickingVolumeSlider.oninput = function(){
+  tickingValue.innerText = this.value;
+  localStorage.setItem("tickingValue", this.value);
+}
 
 window.addEventListener("DOMContentLoaded", () => {
   pomodorosCounter.innerText = pomodosCounter;
-  //Load saved values from local storage
+  //Load saved values from local storage 
+
+  //  Inputs
   timeInput.value = localStorage.getItem("timeInput") || 25;
   timeRestInput.value = localStorage.getItem("timeRestInput") || 10;
   timeLongRestInput.value = localStorage.getItem("timeLongRestInput") || 25;
   longBrakeIntervalInput.value = localStorage.getItem("longBrakeIntervalInput") || 4;
+  currentProject.innerText = localStorage.getItem("currentProject") || "untitled";
+  repeatAlarmInput.value = localStorage.getItem("repeatAlarmInput") || 1;
+
+  //  Checkboxes
+  if(localStorage.getItem("autoStartBreaksSlider") === "true"){
+    autoStartBreaksCheck.checked = true;
+  }else{
+    autoStartBreaksCheck.checked = false;
+  }
+
+  if(localStorage.getItem("autoStartPomodorosSlider") === "true" ){
+    autoStartPomodorosCheck.checked = true;
+  }else{
+    autoStartPomodorosCheck.checked = false;
+  }
+
+  if(localStorage.getItem("autoCheckTasks") === "true" ){
+    autoCheckTasksCheck.checked = true;
+  }else{
+    autoCheckTasksCheck.checked = false;
+  }
+
+  if(localStorage.getItem("autoSwitchTasks") === "true" ){
+    autoSwitchTasksCheck.checked = true;
+  }else{
+    autoSwitchTasksCheck.checked = false;
+  }
+
+  if(localStorage.getItem("darkMode") === "true" ){
+    darkModeCheck.checked = true;
+  }else{
+    darkModeCheck.checked = false;
+  }
+
+  //  Dropdowns
+  alarmSoundsDropDown.value = localStorage.getItem("alarmSounds");
+  tickingSoundsDropDown.value = localStorage.getItem("tickingSounds");
+
+  //  Sliders
+  alarmVolumeSlider.value = localStorage.getItem("alarmVolumeSlider");
+  tickingVolumeSlider.value = localStorage.getItem("tickingVolumeSlider");
+  tickingValue.innerText = localStorage.getItem("tickingValue") || 50;
+
+  //On-start
   const initialTime = getInput(timeInput.value);
   if (initialTime) updateTimer(initialTime);
   taskList.forEach(renderTask);
