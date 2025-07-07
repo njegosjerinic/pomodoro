@@ -40,8 +40,11 @@ const autoStartPomodorosCheck = document.getElementById("autoStartPomodorosSlide
 const autoCheckTasksCheck = document.getElementById("autoCheckTasks");
 const autoSwitchTasksCheck = document.getElementById("autoSwitchTasks");
 const darkModeCheck = document.getElementById("darkMode");
+
+// Dropdowns
 const alarmSoundsDropDown = document.getElementById("alarmSounds");
 const tickingSoundsDropDown = document.getElementById("tickingSounds");
+const hourFormatSelection = document.getElementById("hourFormatSelection");
 
 //  Sliders
 const alarmVolumeSlider = document.getElementById("alarmVolumeSlider");
@@ -257,7 +260,20 @@ function startWorkTimer(duration, restDuration, longRestDuration){
         working();
       }
 
-      if (duration == 0) {
+      if (duration == 0 && autoStartBreaksCheck.checked) {
+        audio.play();
+        clearInterval(countdown);
+        isWorking = false;
+        if(updateRestInterval()){
+          preRestingLong();
+          updateTimer(longRestDuration);
+          startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
+        }else{
+          preRestingShort();
+          updateTimer(restDuration);
+          startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value))
+        }
+      }else if(duration == 0){
         audio.play();
         clearInterval(countdown);
         isWorking = false;
@@ -268,7 +284,6 @@ function startWorkTimer(duration, restDuration, longRestDuration){
           preRestingShort();
           updateTimer(restDuration);
         }
-        
       }
     }, 1000);
 }
@@ -281,7 +296,15 @@ function startRestTimer(duration, restDuration, longRestDuration){
           updateTimer(restDuration);
         }
 
-        if (restDuration == 0) {
+        if (restDuration == 0 && autoStartPomodorosCheck.checked) {
+          audio.play();
+          clearInterval(restCountdown);
+          isWorking = true;
+          preWorking();
+          updateTimer(duration);
+          startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
+          updatePomodorosCounter();
+        }else if(restDuration == 0){
           audio.play();
           clearInterval(restCountdown);
           isWorking = true;
@@ -342,6 +365,10 @@ function renderTask(task) {
   taskContent.style.display = "flex";
   taskContent.style.gap = "10px";
 
+  let taskDonenesAndName = document.createElement("div");
+
+  let taskDonenes = document.createElement("button")
+
   const taskDesc = document.createElement("p");
   taskDesc.innerText = name;
 
@@ -358,7 +385,7 @@ function renderTask(task) {
 
   taskSettingsButton.addEventListener("click", (e) => {
     e.stopPropagation();
-    taskDiv.style.height = "300px"
+    taskDiv.style.height = "300px";
   });
 
   taskDiv.addEventListener("click", () => {
@@ -378,7 +405,9 @@ function renderTask(task) {
 
   taskContent.append(taskTime, taskSettingsButton);
 
-  taskDiv.append(taskDesc, taskContent);
+  taskDonenesAndName.append(taskDonenes, taskDesc);
+
+  taskDiv.append(taskDonenesAndName, taskContent);
   taskContainer.appendChild(taskDiv);
 }
 
@@ -443,13 +472,20 @@ inputBtn.addEventListener("click", function () {
   localStorage.setItem("autoCheckTasks", autoCheckTasksCheck.checked);
   localStorage.setItem("autoSwitchTasks", autoSwitchTasksCheck.checked);
   localStorage.setItem("darkMode", darkModeCheck.checked);
+
+  // Dropdowns
   localStorage.setItem("alarmSounds", alarmSoundsDropDown.value);
   localStorage.setItem("tickingSounds", tickingSoundsDropDown.value);
+  localStorage.setItem("hourFormatSelection", hourFormatSelection.value);
 
   //  Sliders
   localStorage.setItem("alarmVolumeSlider", alarmVolumeSlider.value);
   localStorage.setItem("tickingVolumeSlider", tickingVolumeSlider.value);
   localStorage.setItem("tickingValue", tickingVolumeSlider.value);
+
+  if(isWorking){
+    updateTimer(getInput(localStorage.getItem("timeInput")));
+  }
 });
 
 //  Starting the timer
@@ -624,8 +660,9 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   //  Dropdowns
-  alarmSoundsDropDown.value = localStorage.getItem("alarmSounds");
-  tickingSoundsDropDown.value = localStorage.getItem("tickingSounds");
+  alarmSoundsDropDown.value = localStorage.getItem("alarmSounds") || "kitchen";
+  tickingSoundsDropDown.value = localStorage.getItem("tickingSounds") || "none";
+  hourFormatSelection.value = localStorage.getItem("hourFormatSelection") || "24-hour" ;
 
   //  Sliders
   alarmVolumeSlider.value = localStorage.getItem("alarmVolumeSlider");
