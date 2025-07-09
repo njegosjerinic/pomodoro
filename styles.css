@@ -719,6 +719,53 @@ input:checked + .slider:before {
     display: none;
 }
 
+/* Checkboxes */
+
+.custom-checkbox {
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+}
+
+.custom-checkbox input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.checkmark {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  background-color: gray;
+  border-radius: 50%;
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+/* White checkmark always visible */
+.checkmark::after {
+  content: '✔';
+  color: white;
+  font-size: 16px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%);
+  pointer-events: none;
+  opacity: 1;
+}
+
+/* Change background when checked */
+.custom-checkbox input:checked ~ .checkmark {
+  background-color: indianred;
+}
+
+
+
 @media screen and (max-width:620px) {
     header{
         width: 100%;

@@ -11,6 +11,7 @@ const amountOfPomodorosInput = document.getElementById(
 const tasks = document.querySelectorAll(".task");
 const pomodorosCounter = document.getElementById("pomodorosCounter");
 
+
 const currentProject = document.getElementById("currentProject");
 
 //  Inputs
@@ -324,7 +325,7 @@ function startLongRestTimer(duration, restDuration, longRestDuration){
 
         if (longRestDuration == 0) {
           audio.play();
-          clearInterval(restCountdown);
+          clearInterval(longRestCountdown);
           isWorking = true;
           preWorking();
           updateTimer(duration);
@@ -354,7 +355,7 @@ function saveTasks() {
 
 //This renders the Tasks
 function renderTask(task) {
-  let { id, name, pomodorosToDo, donePomodoros, isActive } = task;
+  let { id, name, pomodorosToDo, donePomodoros, isActive, isChecked } = task;
 
   const taskDiv = document.createElement("div");
   taskDiv.dataset.id = id;
@@ -366,11 +367,25 @@ function renderTask(task) {
   taskContent.style.gap = "10px";
 
   let taskDonenesAndName = document.createElement("div");
+  taskDonenesAndName.style.display = "flex";
+  taskDonenesAndName.style.alignItems = "center";
+  taskDonenesAndName.style.height = "50px";
+  taskDonenesAndName.style.gap = "10px";
+  taskDonenesAndName.style.padding = "0px 20px";
 
-  let taskDonenes = document.createElement("button")
+  let taskDonenes = document.createElement("label");
+  taskDonenes.className = "custom-checkbox"
+
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.id = `checkbox-${Date.now()}`;
+
+  const checkmark = document.createElement("span");
+  checkmark.className = "checkmark";
 
   const taskDesc = document.createElement("p");
   taskDesc.innerText = name;
+  taskDesc.className = "task-description";
 
   const taskTime = document.createElement("p");
   taskTime.innerText = `${donePomodoros} / ${pomodorosToDo}`;
@@ -379,13 +394,49 @@ function renderTask(task) {
     taskDiv.className = "task active";
   }
 
+  if(isChecked){
+    taskDesc.style.textDecoration = "line-through";
+    checkmark.style.backgroundColor = "indianred";
+  }
+
+  if(autoCheckTasksCheck.checked && task.donePomodoros == pomodorosToDo -1){
+    task.isChecked = true;
+  }
+
   const taskSettingsButton = document.createElement("button");
   taskSettingsButton.innerHTML = "&vellip;";
   taskSettingsButton.id = `button-${Date.now()}`;
 
+  const settingsTaskInput = document.createElement("input");
+  settingsTaskInput.value = task.name;
+  settingsTaskInput.style.display = "none";
+
+  const buttonsForManipulationDiv = document.createElement("div");
+  const saveAndCancelDiv = document.createElement("div");
+
+  const deleteTaskBtn = document.createElement("button");
+  deleteTaskBtn.innerText = "delete";
+  const cancelTaskEditBtn = document.createElement("button");
+  cancelTaskEditBtn.innerText = "cancel";
+  const saveTaskEditBtn = document.createElement("button");
+  saveTaskEditBtn.innerHTML = "save"
+
+  saveAndCancelDiv.append(cancelTaskEditBtn,saveTaskEditBtn);
+
+
+  buttonsForManipulationDiv.append(deleteTaskBtn,saveAndCancelDiv);
+  buttonsForManipulationDiv.style.display = ""
+
   taskSettingsButton.addEventListener("click", (e) => {
     e.stopPropagation();
     taskDiv.style.height = "300px";
+    taskDonenes.style.display = "none";
+    settingsTaskInput.style.display = "block";
+    taskDesc.style.display = "none"
+    taskContent.style.display = "none";
+    task.style.display = "flex";
+    task.style.flexDirection = "column"
+    buttonsForManipulationDiv.style.display = "block"
   });
 
   taskDiv.addEventListener("click", () => {
@@ -403,11 +454,30 @@ function renderTask(task) {
     saveTasks();
   });
 
+  checkbox.addEventListener("click", function(e){
+    e.stopPropagation();
+    if(taskDesc.style.textDecoration === "line-through"){
+      taskDesc.style.textDecoration = "none";
+      task.isChecked = false;
+    }else{
+      taskDesc.style.textDecoration = "line-through";
+      task.isChecked = true;
+    }
+    saveTasks();
+  });
+
+  taskDonenes.addEventListener("click", function(e){
+    e.stopPropagation();
+  })
+
+
   taskContent.append(taskTime, taskSettingsButton);
+
+  taskDonenes.append(checkbox, checkmark)
 
   taskDonenesAndName.append(taskDonenes, taskDesc);
 
-  taskDiv.append(taskDonenesAndName, taskContent);
+  taskDiv.append(taskDonenesAndName, taskContent, settingsTaskInput, buttonsForManipulationDiv);
   taskContainer.appendChild(taskDiv);
 }
 
@@ -426,6 +496,7 @@ function addTask() {
     pomodorosToDo,
     donePomodoros: 0,
     isActive: false,
+    isChecked:false
   };
 
   taskList.push(newTask);
@@ -433,7 +504,7 @@ function addTask() {
   renderTask(newTask);
 
   taskInput.value = "";
-  amountOfPomodorosInput.value = "";
+  amountOfPomodorosInput.value = "1";
 }
 
 function updatePomodorosCounterPerTask() {
@@ -492,12 +563,13 @@ inputBtn.addEventListener("click", function () {
 timeBtnStart.addEventListener("click", function () {
   if (isWorking) {
     updatePomodorosCounter();
-    updatePomodorosCounterPerTask();
     startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
   }else if(updateRestInterval() || isRestingLong){
     startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
+    updatePomodorosCounterPerTask();
   }else{
     startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
+    updatePomodorosCounterPerTask();
   }
 });
 
@@ -530,6 +602,7 @@ timeBtnFF.addEventListener("click", function () {
       isWorking = true;
     }
   }
+  saveTasks()
 });
 
 //  Code for pausing
@@ -573,28 +646,30 @@ cancelCreation.addEventListener("click", function () {
 createTask.addEventListener("click", addTask);
 
 workModeBtn.addEventListener('click', function(){
+  isRestingLong = false;
   if(isWorking){
     clearInterval(countdown)
     updateTimer(getInput(timeInput.value))
     preWorking();
-  }else{
-    clearInterval(restCountdown || longRestCountdown)
+  }else if(!isWorking){
+    clearInterval(restCountdown);
+    clearInterval(longRestCountdown);
     updateTimer(getInput(timeInput.value))
     preWorking();
-    isRestingLong = false;
   }
 });
 
 shortBrakeModeBtn.addEventListener('click',function(){
+  isRestingLong = false;
   if(isWorking){
     clearInterval(countdown)
     updateTimer(getInput(timeRestInput.value))
     preRestingShort();
   }else if(!isWorking){
-    clearInterval(restCountdown || longRestCountdown)
+    clearInterval(restCountdown);
+    clearInterval(longRestCountdown);
     updateTimer(getInput(timeRestInput.value))
     preRestingShort();
-    isRestingLong = false;
   }
 });
 
@@ -605,7 +680,8 @@ longBrakeModeBtn.addEventListener('click', function(){
     updateTimer(getInput(longBreakInput.value))
     preRestingLong();
   }else if(!isWorking){
-    clearInterval(restCountdown || countdown)
+    clearInterval(restCountdown);
+    clearInterval(longRestCountdown);
     updateTimer(getInput(longBreakInput.value))
     preRestingLong();
   }
