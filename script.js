@@ -399,45 +399,101 @@ function renderTask(task) {
     checkmark.style.backgroundColor = "indianred";
   }
 
-  if(autoCheckTasksCheck.checked && task.donePomodoros == pomodorosToDo -1){
-    task.isChecked = true;
-  }
+  
 
   const taskSettingsButton = document.createElement("button");
   taskSettingsButton.innerHTML = "&vellip;";
-  taskSettingsButton.id = `button-${Date.now()}`;
+  taskSettingsButton.className = "task-mod";
+
+  const taskModPanel = document.createElement("div");
+  const taskModInputPanel = document.createElement("div");
 
   const settingsTaskInput = document.createElement("input");
   settingsTaskInput.value = task.name;
   settingsTaskInput.style.display = "none";
+
+  const settingsPomodorosInput = document.createElement("input");
+  settingsPomodorosInput.value = task.pomodorosToDo;
+  settingsPomodorosInput.type = "number";
+
+  const pomodoroCounterForTaskModificationDiv = document.createElement("p");
+  pomodoroCounterForTaskModificationDiv.innerText = donePomodoros;
+  
+  const modifyingPomodorosToDoContainer = document.createElement("div");
+  modifyingPomodorosToDoContainer.className = "modifying-pomodoros-container";
+
+  modifyingPomodorosToDoContainer.append(settingsPomodorosInput,pomodoroCounterForTaskModificationDiv);
+
+  taskModInputPanel.append(settingsTaskInput,modifyingPomodorosToDoContainer);
+  taskModInputPanel.style.height = "60%";
+  taskModInputPanel.style.display = "flex";
+  taskModInputPanel.style.flexDirection = "column";
+  taskModInputPanel.style.alignItems = "flex-start";
+  taskModInputPanel.style.justifyContent = "space-between"
 
   const buttonsForManipulationDiv = document.createElement("div");
   const saveAndCancelDiv = document.createElement("div");
 
   const deleteTaskBtn = document.createElement("button");
   deleteTaskBtn.innerText = "delete";
+  deleteTaskBtn.className = "task-mod-buttons";
   const cancelTaskEditBtn = document.createElement("button");
   cancelTaskEditBtn.innerText = "cancel";
+  cancelTaskEditBtn.className = "task-mod-buttons";
   const saveTaskEditBtn = document.createElement("button");
-  saveTaskEditBtn.innerHTML = "save"
+  saveTaskEditBtn.innerHTML = "save";
+  saveTaskEditBtn.className = "task-mod-buttons-save";
 
   saveAndCancelDiv.append(cancelTaskEditBtn,saveTaskEditBtn);
 
 
   buttonsForManipulationDiv.append(deleteTaskBtn,saveAndCancelDiv);
-  buttonsForManipulationDiv.style.display = ""
+  buttonsForManipulationDiv.style.display = "flex";
+  buttonsForManipulationDiv.style.justifyContent = "space-between";
+  buttonsForManipulationDiv.className = "buttons-for-manipulation";
+
+  taskModPanel.append(taskModInputPanel,buttonsForManipulationDiv);
+  taskModPanel.style.display = "none";
+  taskModPanel.style.width = "100%";
+  taskModPanel.style.height = "100%";
+  taskModPanel.style.flexDirection = "column";
+  taskModPanel.style.justifyContent = "space-between";
+  taskModPanel.style.margin = "0px";
 
   taskSettingsButton.addEventListener("click", (e) => {
     e.stopPropagation();
-    taskDiv.style.height = "300px";
+    taskDiv.style.height = "282px";
+    taskDiv.style.width = "455px";
     taskDonenes.style.display = "none";
     settingsTaskInput.style.display = "block";
     taskDesc.style.display = "none"
     taskContent.style.display = "none";
-    task.style.display = "flex";
-    task.style.flexDirection = "column"
-    buttonsForManipulationDiv.style.display = "block"
+    taskDiv.style.display = "flex";
+    taskDiv.style.flexDirection = "column";
+    taskDonenesAndName.style.display = "none";
+    taskModPanel.style.display = "flex";
+    taskDiv.style.padding = "0"
   });
+
+  cancelTaskEditBtn.addEventListener("click", function(e){
+    e.stopPropagation();
+    taskDiv.style.height = "70px";
+    taskDiv.style.flexDirection = "row";
+    taskDonenes.style.display = "flex";
+    settingsTaskInput.style.display = "none";
+    taskDesc.style.display = "flex"
+    taskContent.style.display = "flex";
+    taskDonenesAndName.style.display = "flex";
+    taskModPanel.style.display = "flex";
+    taskModPanel.style.display = "none";
+  });
+
+  deleteTaskBtn.addEventListener("click", function(e){
+    e.stopPropagation();
+    taskContainer.removeChild(taskDiv);
+    taskList = taskList.filter(t => t.id !== id);
+    saveTasks();
+  })
 
   taskDiv.addEventListener("click", () => {
     if (taskDiv.classList.contains("active")) return;
@@ -477,7 +533,8 @@ function renderTask(task) {
 
   taskDonenesAndName.append(taskDonenes, taskDesc);
 
-  taskDiv.append(taskDonenesAndName, taskContent, settingsTaskInput, buttonsForManipulationDiv);
+  taskDiv.append(taskDonenesAndName, taskContent, taskModPanel);
+
   taskContainer.appendChild(taskDiv);
 }
 
@@ -512,6 +569,20 @@ function updatePomodorosCounterPerTask() {
 
   // 2) re‑render each task
   taskList.forEach(renderTask);
+}
+
+function taskCompletionCheck(){
+   taskList.forEach(task => {
+    if(autoCheckTasksCheck.checked && task.donePomodoros >= task.pomodorosToDo -1 && task.isActive){
+      task.isChecked = true;
+      if(autoSwitchTasksCheck.checked){
+        task.isActive = false;
+        task.className = "task"
+      }
+    }
+    saveTasks();
+  });
+
 }
 
 //================================================================EVENT LISTENERS============================================================//
@@ -566,9 +637,11 @@ timeBtnStart.addEventListener("click", function () {
     startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
   }else if(updateRestInterval() || isRestingLong){
     startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
+    taskCompletionCheck();
     updatePomodorosCounterPerTask();
   }else{
     startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
+    taskCompletionCheck();
     updatePomodorosCounterPerTask();
   }
 });
@@ -611,10 +684,8 @@ timeBtnPause.addEventListener("click", function () {
   if(isWorking){
   if (isPaused) {
     resumeCountdownWork();
-    console.log(autoStartBreaksCheck.checked)
   } else {
     pauseCountdownWork();
-    console.log(autoStartBreaksCheck.checked)
   }
   }else{
     if(updateRestInterval()){
