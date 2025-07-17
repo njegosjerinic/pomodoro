@@ -49,6 +49,7 @@ const hourFormatSelection = document.getElementById("hourFormatSelection");
 
 //  Sliders
 const alarmVolumeSlider = document.getElementById("alarmVolumeSlider");
+const alarmValue = document.getElementById("alarmValue");
 const tickingVolumeSlider = document.getElementById("tickingVolumeSlider");
 const tickingValue = document.getElementById("tickingValue");
 
@@ -57,8 +58,14 @@ const settingsScreen = document.querySelector(".settings-screen");
 const addTaskPanel = document.getElementById("addTaskPanel");
 const overlay = document.getElementById("overlay");
 
-// Audio
-const audio = new Audio("audiomass-output.mp3");
+// Audios for alarm
+const kitchenAudio = new Audio("audiomass-output.mp3");
+const bellAudio = new Audio("bellAudio.mp3");
+
+// Audios for ticking
+
+const slowTickingSound = new Audio("usedSlowClock.mp3");
+const fastTickingSound = new Audio("usedFastClock.mp3");
 
 // --- App State ---
 let countdown;
@@ -98,7 +105,6 @@ function preWorking() {
   timeBtnFF.style.display = "none";
   timeBtnPause.style.display = "none";
   taskContainer.style.display = "block";
-  addTaskBtn.style.display = "block";
 }
 
 function working() {
@@ -108,7 +114,6 @@ function working() {
   timeBtnFF.style.display = "block";
   timeBtnPause.style.display = "block";
   taskContainer.style.display = "block";
-  addTaskBtn.style.display = "block";
   title.style.display = "block";
 }
 
@@ -119,7 +124,6 @@ function showWorkDarkModeUI() {
   timeBtnFF.style.display = "block";
   timeBtnPause.style.display = "block";
   taskContainer.style.display = "none";
-  addTaskBtn.style.display = "none";
   title.style.display = "none";
 }
 
@@ -130,7 +134,6 @@ function preRestingShort() {
   timeBtnPause.style.display = "none";
   body.style.backgroundColor = "green";
   taskContainer.style.display = "block";
-  addTaskBtn.style.display = "block";
 }
 
 function restingShort() {
@@ -140,7 +143,6 @@ function restingShort() {
   timeBtnFF.style.display = "block";
   timeBtnPause.style.display = "block";
   taskContainer.style.display = "block";
-  addTaskBtn.style.display = "block";
 }
 
 function preRestingLong(){
@@ -151,7 +153,6 @@ function preRestingLong(){
   timeBtnPause.style.display = "none";
   body.style.backgroundColor = "rgb(57, 112, 151)";
   taskContainer.style.display = "block";
-  addTaskBtn.style.display = "block";
 }
 
 function restingLong(){
@@ -162,7 +163,6 @@ function restingLong(){
   timeBtnFF.style.display = "block";
   timeBtnPause.style.display = "block";
   taskContainer.style.display = "block";
-  addTaskBtn.style.display = "block";
 }
 
 
@@ -173,7 +173,6 @@ function pauseCountdownWork() {
   timeBtnPause.innerText = "Resume";
   body.style.backgroundColor = "rgb(186, 73, 73)";
   taskContainer.style.display = "flex";
-  addTaskBtn.style.display = "block";
   title.style.display = "block";
   timeBtnPause.style.background = "white";
   timeBtnPause.style.borderRadius = "5px";
@@ -185,7 +184,6 @@ function resumeCountdownWork() {
   timeBtnPause.innerText = "Pause";
   body.style.backgroundColor = "rgb(186, 73, 73)";
   taskContainer.style.display = "block";
-  addTaskBtn.style.display = "block";
   title.style.display = "block";
   timeBtnPause.style.background = "transparent";
   timeBtnPause.style.color = "white";
@@ -196,7 +194,6 @@ function pauseCountdownRestingShort() {
   timeBtnPause.innerText = "Resume";
   body.style.backgroundColor = "green";
   taskContainer.style.display = "flex";
-  addTaskBtn.style.display = "block";
   title.style.display = "block";
   timeBtnPause.style.background = "white";
   timeBtnPause.style.borderRadius = "5px";
@@ -208,7 +205,6 @@ function resumeCountdownRestingShort() {
   timeBtnPause.innerText = "Pause";
   body.style.backgroundColor = "green";
   taskContainer.style.display = "block";
-  addTaskBtn.style.display = "block";
   title.style.display = "block";
   timeBtnPause.style.background = "transparent";
   timeBtnPause.style.color = "white";
@@ -220,7 +216,6 @@ function pauseCountdownRestingLong() {
   timeBtnPause.innerText = "Resume";
   body.style.backgroundColor = "rgb(57, 112, 151)";
   taskContainer.style.display = "flex";
-  addTaskBtn.style.display = "block";
   title.style.display = "block";
   timeBtnPause.style.background = "white";
   timeBtnPause.style.borderRadius = "5px";
@@ -232,7 +227,6 @@ function resumeCountdownRestingLong() {
   timeBtnPause.innerText = "Pause";
   body.style.backgroundColor = "rgb(57, 112, 151)";
   taskContainer.style.display = "block";
-  addTaskBtn.style.display = "block";
   title.style.display = "block";
   timeBtnPause.style.background = "transparent";
   timeBtnPause.style.color = "white";
@@ -259,10 +253,11 @@ function startWorkTimer(duration, restDuration, longRestDuration){
         duration--;
         updateTimer(duration);
         working();
+        tickingSoundMod()
       }
 
       if (duration == 0 && autoStartBreaksCheck.checked) {
-        audio.play();
+        alarmSoundSelector();
         clearInterval(countdown);
         isWorking = false;
         if(updateRestInterval()){
@@ -275,7 +270,7 @@ function startWorkTimer(duration, restDuration, longRestDuration){
           startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value))
         }
       }else if(duration == 0){
-        audio.play();
+        alarmSoundSelector();
         clearInterval(countdown);
         isWorking = false;
         if(updateRestInterval()){
@@ -298,7 +293,7 @@ function startRestTimer(duration, restDuration, longRestDuration){
         }
 
         if (restDuration == 0 && autoStartPomodorosCheck.checked) {
-          audio.play();
+          alarmSoundSelector();
           clearInterval(restCountdown);
           isWorking = true;
           preWorking();
@@ -306,7 +301,7 @@ function startRestTimer(duration, restDuration, longRestDuration){
           startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
           updatePomodorosCounter();
         }else if(restDuration == 0){
-          audio.play();
+          alarmSoundSelector();
           clearInterval(restCountdown);
           isWorking = true;
           preWorking();
@@ -324,7 +319,7 @@ function startLongRestTimer(duration, restDuration, longRestDuration){
         }
 
         if (longRestDuration == 0) {
-          audio.play();
+          alarmSoundSelector()
           clearInterval(longRestCountdown);
           isWorking = true;
           preWorking();
@@ -353,39 +348,36 @@ function saveTasks() {
   localStorage.setItem("tasks", JSON.stringify(taskList));
 }
 
+function createElement(tag, className = "",style = {}){
+  const el = document.createElement(tag);
+  el.className = className;
+  Object.assign(el.style, style);
+  return el
+}
+
 //This renders the Tasks
 function renderTask(task) {
   let { id, name, pomodorosToDo, donePomodoros, isActive, isChecked } = task;
 
-  const taskDiv = document.createElement("div");
+  const taskDiv = createElement("div", "task");
   taskDiv.dataset.id = id;
-  taskDiv.className = "task";
 
-  let taskContent = document.createElement("div");
+  let taskContent = createElement("div", "task-content", {display : "flex", gap : "10px"});
   taskContent.className = "task-content";
-  taskContent.style.display = "flex";
-  taskContent.style.gap = "10px";
 
-  let taskDonenesAndName = document.createElement("div");
-  taskDonenesAndName.style.display = "flex";
-  taskDonenesAndName.style.alignItems = "center";
-  taskDonenesAndName.style.height = "50px";
-  taskDonenesAndName.style.gap = "10px";
-  taskDonenesAndName.style.padding = "0px 20px";
+  let taskDonenesAndName = createElement("div", "task-donenes-and-name", {display : "flex", alignItems : "center", height : "50px", gap : "10px", padding : "0px 20px"});
 
-  let taskDonenes = document.createElement("label");
-  taskDonenes.className = "custom-checkbox"
+  let taskDonenes = createElement("label", "custom-checkbox");
 
-  const checkbox = document.createElement("input");
+
+  const checkbox = createElement("input");
   checkbox.type = "checkbox";
   checkbox.id = `checkbox-${Date.now()}`;
 
-  const checkmark = document.createElement("span");
-  checkmark.className = "checkmark";
+  const checkmark = createElement("span", "checkmark");
 
-  const taskDesc = document.createElement("p");
+  const taskDesc = createElement("p", "task-description");
   taskDesc.innerText = name;
-  taskDesc.className = "task-description";
 
   const taskTime = document.createElement("p");
   taskTime.innerText = `${donePomodoros} / ${pomodorosToDo}`;
@@ -394,32 +386,35 @@ function renderTask(task) {
     taskDiv.className = "task active";
   }
 
-  if(isChecked){
+  if(isChecked && autoSwitchTasksCheck.checked){
+
+    taskDesc.style.textDecoration = "line-through";
+    checkmark.style.backgroundColor = "indianred";
+  }else if(isChecked){
     taskDesc.style.textDecoration = "line-through";
     checkmark.style.backgroundColor = "indianred";
   }
 
-  
 
-  const taskSettingsButton = document.createElement("button");
+  const taskSettingsButton = createElement("button");
   taskSettingsButton.innerHTML = "&vellip;";
   taskSettingsButton.className = "task-mod";
 
-  const taskModPanel = document.createElement("div");
-  const taskModInputPanel = document.createElement("div");
+  const taskModPanel = createElement("div");
+  const taskModInputPanel = createElement("div");
 
-  const settingsTaskInput = document.createElement("input");
+  const settingsTaskInput = createElement("input");
   settingsTaskInput.value = task.name;
   settingsTaskInput.style.display = "none";
 
-  const settingsPomodorosInput = document.createElement("input");
+  const settingsPomodorosInput = createElement("input");
   settingsPomodorosInput.value = task.pomodorosToDo;
   settingsPomodorosInput.type = "number";
 
-  const pomodoroCounterForTaskModificationDiv = document.createElement("p");
+  const pomodoroCounterForTaskModificationDiv = createElement("p");
   pomodoroCounterForTaskModificationDiv.innerText = donePomodoros;
   
-  const modifyingPomodorosToDoContainer = document.createElement("div");
+  const modifyingPomodorosToDoContainer = createElement("div");
   modifyingPomodorosToDoContainer.className = "modifying-pomodoros-container";
 
   modifyingPomodorosToDoContainer.append(settingsPomodorosInput,pomodoroCounterForTaskModificationDiv);
@@ -553,7 +548,7 @@ function addTask() {
     pomodorosToDo,
     donePomodoros: 0,
     isActive: false,
-    isChecked:false
+    isChecked:false,
   };
 
   taskList.push(newTask);
@@ -571,18 +566,51 @@ function updatePomodorosCounterPerTask() {
   taskList.forEach(renderTask);
 }
 
-function taskCompletionCheck(){
-   taskList.forEach(task => {
-    if(autoCheckTasksCheck.checked && task.donePomodoros >= task.pomodorosToDo -1 && task.isActive){
+function taskCompletionCheck() {
+  for (let index = 0; index < taskList.length; index++) {
+    const task = taskList[index];
+    const nextTask = taskList.every(task => task.isChecked) ? null : taskList[0];
+
+    if (
+      autoCheckTasksCheck.checked &&
+      task.donePomodoros >= task.pomodorosToDo - 1 &&
+      task.isActive
+    ) {
       task.isChecked = true;
-      if(autoSwitchTasksCheck.checked){
+
+      if (autoSwitchTasksCheck.checked) {
         task.isActive = false;
-        task.className = "task"
+        if (nextTask) {
+          nextTask.isActive = true;
+        }
+
+        if (taskList.length >= 2) {
+          taskList.splice(index, 1);      // Remove from current position
+          taskList.push(task);            // Move to the end
+        }
       }
     }
-    saveTasks();
-  });
+  }
 
+  saveTasks();
+}
+
+function alarmSoundSelector(){
+  if(alarmSoundsDropDown.value === 'kitchen'){
+    kitchenAudio.play();
+    kitchenAudio.volume = alarmVolumeSlider.value / 100;
+  }else{
+    bellAudio.play();
+    bellAudio.volume = alarmVolumeSlider.value / 100;
+  }
+}
+
+function tickingSoundMod(){
+  if(tickingSoundsDropDown.value === "Ticking Fast"){
+    fastTickingSound.play();
+  }else{
+    slowTickingSound.play();
+  }
 }
 
 //================================================================EVENT LISTENERS============================================================//
@@ -622,6 +650,7 @@ inputBtn.addEventListener("click", function () {
 
   //  Sliders
   localStorage.setItem("alarmVolumeSlider", alarmVolumeSlider.value);
+  localStorage.setItem("alarmValue", alarmVolumeSlider.value);
   localStorage.setItem("tickingVolumeSlider", tickingVolumeSlider.value);
   localStorage.setItem("tickingValue", tickingVolumeSlider.value);
 
@@ -763,6 +792,11 @@ tickingVolumeSlider.oninput = function(){
   localStorage.setItem("tickingValue", this.value);
 }
 
+alarmVolumeSlider.oninput = function(){
+  alarmValue.innerText = this.value;
+  localStorage.setItem("alarmValue", this.value);
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   pomodorosCounter.innerText = pomodosCounter;
   //Load saved values from local storage 
@@ -813,6 +847,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   //  Sliders
   alarmVolumeSlider.value = localStorage.getItem("alarmVolumeSlider");
+  alarmValue.innerText = localStorage.getItem("alarmValue") || 50;
   tickingVolumeSlider.value = localStorage.getItem("tickingVolumeSlider");
   tickingValue.innerText = localStorage.getItem("tickingValue") || 50;
 

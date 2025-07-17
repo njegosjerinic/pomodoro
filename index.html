@@ -84,7 +84,10 @@
                             <option value="kitchen">Kitchen</option>
                             <option value="bell">Bell</option>
                         </select>
-                        <input type="range" min="1" max="100" value="50" class="alarm-slider" id="alarmVolumeSlider">
+                        <div class="sliders">
+                            <input type="range" min="1" max="100" value="50" class="alarm-slider" id="alarmVolumeSlider">
+                            <p id="alarmValue"></p>
+                        </div>
                         <div class="repeat-alarm-container">
                             <span>repeat</span>
                             <input type="number" class="repeat-alarm" value="1" id="repeatAlarmInput">
@@ -99,8 +102,10 @@
                             <option value="ticking-fast">Ticking Fast</option>
                             <option value="ticking-slow">Ticking Slow</option>
                         </select>
-                        <input type="range" min="1" max="100" value="50" class="ticking-slider" id="tickingVolumeSlider">
-                        <p id="tickingValue"></p>
+                        <div class="sliders">
+                            <input type="range" min="1" max="100" value="50" class="ticking-slider" id="tickingVolumeSlider">
+                            <p id="tickingValue"></p>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -393,9 +393,19 @@ input:checked + .slider:before {
     margin: 20px 0;
 }
 
+.sliders{
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
 .alarm-slider-container{
     display: flex;
     flex-direction: column;
+    width: 175px;
+    align-items: flex-end;
 }
 
 #alarmSounds{
@@ -464,6 +474,8 @@ input:checked + .slider:before {
 .ticking-slider-container{
     display: flex;
     flex-direction: column;
+    width: 175px;
+    align-items: flex-end;
 }
 
 #tickingSounds{
