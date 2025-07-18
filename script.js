@@ -34,6 +34,9 @@ const inputBtn = document.getElementById("inputTimeBtn");
 const workModeBtn = document.getElementById("workModeBtn");
 const shortBrakeModeBtn = document.getElementById("shortBrakeBtn");
 const longBrakeModeBtn = document.getElementById("longBrakeBtn");
+const workingColor = document.getElementById("workingColor");
+const shortBrakeColor = document.getElementById("shortbreakColor");
+const longBrakeColor = document.getElementById("longbreakColor");
 
 //  Checkboxes
 const autoStartBreaksCheck = document.getElementById("autoStartBreaksSlider");
@@ -57,6 +60,7 @@ const tickingValue = document.getElementById("tickingValue");
 const settingsScreen = document.querySelector(".settings-screen");
 const addTaskPanel = document.getElementById("addTaskPanel");
 const overlay = document.getElementById("overlay");
+const colorSelector = document.querySelector(".color-selector");
 
 // Audios for alarm
 const kitchenAudio = new Audio("audiomass-output.mp3");
@@ -104,7 +108,7 @@ function preWorking() {
   timeBtnStart.style.display = "block";
   timeBtnFF.style.display = "none";
   timeBtnPause.style.display = "none";
-  taskContainer.style.display = "block";
+  taskContainer.style.display = "flex";
 }
 
 function working() {
@@ -597,19 +601,36 @@ function taskCompletionCheck() {
 
 function alarmSoundSelector(){
   if(alarmSoundsDropDown.value === 'kitchen'){
-    kitchenAudio.play();
+    for(let i = 0; i < repeatAlarmInput.value; i++){
+      kitchenAudio.play();
+    } 
     kitchenAudio.volume = alarmVolumeSlider.value / 100;
   }else{
-    bellAudio.play();
+    for(let i = 0; i < repeatAlarmInput.value; i++){
+      bellAudio.play();
+    }
     bellAudio.volume = alarmVolumeSlider.value / 100;
   }
 }
 
 function tickingSoundMod(){
-  if(tickingSoundsDropDown.value === "Ticking Fast"){
+  if(tickingSoundsDropDown.value === "ticking-fast"){
     fastTickingSound.play();
-  }else{
+    fastTickingSound.volume = tickingVolumeSlider.value / 100;
+  }else if(tickingSoundsDropDown.value === "ticking-slow"){
     slowTickingSound.play();
+    slowTickingSound.volume = tickingVolumeSlider.value / 100;
+  }else if(tickingSoundsDropDown.value === "none"){
+    fastTickingSound.pause();
+    slowTickingSound.pause();
+  }
+}
+
+function toggleColorSelector(){
+  if (colorSelector.style.display === "none" || colorSelector.style.display === "") {
+    colorSelector.style.display = "block";
+  } else {
+    colorSelector.style.display = "none";
   }
 }
 
@@ -622,6 +643,54 @@ settings.addEventListener("click", function () {
 exitSettingsButton.addEventListener("click", function () {
   settingsScreen.style.display = "none";
   overlay.style.display = "none";
+});
+
+document.addEventListener("click", function (event) {
+
+  const clickedInsideColorSelector =
+    colorSelector.contains(event.target) ||
+    workingColor.contains(event.target) ||
+    shortBrakeColor.contains(event.target) ||
+    longBrakeColor.contains(event.target);
+
+  const clickedInsideSettings =
+    settings.contains(event.target) || settingsScreen.contains(event.target);
+
+  // CLOSE COLOR SELECTOR if clicked outside it and outside color buttons
+  if (!clickedInsideColorSelector) {
+    colorSelector.style.display = "none";
+  }
+
+  // CLOSE SETTINGS SCREEN if clicked outside settings and settings screen
+  if (!clickedInsideSettings) {
+    settingsScreen.style.display = "none";
+    overlay.style.display = "none";
+    overlay.style.alignItems = "flex-start";
+  }
+});
+
+
+
+// Color selector
+workingColor.addEventListener("click", function () { 
+  document.getElementById("colorTitleUse").innerText = "Pomodoro";
+  toggleColorSelector();
+  settingsScreen.style.display = "none";
+  overlay.style.alignItems = "center";
+});
+
+shortBrakeColor.addEventListener("click", function () { 
+  document.getElementById("colorTitleUse").innerText = "Short Break";
+  toggleColorSelector();
+  settingsScreen.style.display = "none";
+  overlay.style.alignItems = "center";
+});
+
+longBrakeColor.addEventListener("click", function () { 
+  document.getElementById("colorTitleUse").innerText = "Long Break";
+  toggleColorSelector();
+  settingsScreen.style.display = "none";
+  overlay.style.alignItems = "center";
 });
 
 //  Save input values when Ok is clicked in the settings menu

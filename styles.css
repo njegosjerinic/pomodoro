@@ -234,6 +234,7 @@ p{
     z-index: 100;      
     justify-content: center;
     overflow: scroll;
+    overflow-x: hidden;
   }
 
 
@@ -698,6 +699,7 @@ input:checked + .slider:before {
     padding: 20px;
     border-radius: 10px;
     color: black;
+    margin: 5px;
 }
 
 #addTaskPanel p{
@@ -849,16 +851,84 @@ input:checked + .slider:before {
     width: 40px;
 }
 
+.color-title{
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    font-weight: bold;
+    padding: 10px 1rem 1rem 1rem;
+    border-bottom: 1px solid #e5e5e5;
+    gap: 5px;
+}
 
+.color-selector{
+    display: none; 
+    position: absolute;
+    flex-direction: row;
+    align-items: center;
+    width: 400px;
+    height: 200px;
+    margin: 100px 0 0 0;
+    z-index: 101;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.color{
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: rgb(186,73,73);
+    width: 4rem;
+    height: 4rem;
+    border-radius: 0.6rem;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
 
 
 @media screen and (max-width:620px) {
     header{
+        width: 90%;
+    }
+
+    .header-content{
         width: 100%;
     }
 
-    .timer-background{
+    .pomodoro-progress{
         width: 100%;
+    }
+
+    .overlay{
+        width: 95%;
+        height: 100%;
+    }
+
+    .timer-background{
+        width: 95%;
     }
 
     .task{
@@ -874,6 +944,10 @@ input:checked + .slider:before {
 
     .pomodoro-layout{
         width: 100%;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
     .settings-screen{
@@ -881,7 +955,15 @@ input:checked + .slider:before {
         
     }
 
+    #title{
+        width: 90%;
+    }
+
     #addTaskBtn{
         width: 98%;
+    }
+
+    #addTaskPanel{
+        width: 88%;
     }
 }
