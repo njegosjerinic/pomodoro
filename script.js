@@ -10,7 +10,7 @@ const amountOfPomodorosInput = document.getElementById(
 );
 const tasks = document.querySelectorAll(".task");
 const pomodorosCounter = document.getElementById("pomodorosCounter");
-
+const acumulatedPomodorosView = document.querySelector(".acumulatedPomodoros");
 
 const currentProject = document.getElementById("currentProject");
 
@@ -61,6 +61,7 @@ const settingsScreen = document.querySelector(".settings-screen");
 const addTaskPanel = document.getElementById("addTaskPanel");
 const overlay = document.getElementById("overlay");
 const colorSelector = document.querySelector(".color-selector");
+const colorSelectorContainer = document.querySelector(".color-selector-container");
 
 // Audios for alarm
 const kitchenAudio = new Audio("audiomass-output.mp3");
@@ -82,6 +83,8 @@ let numberOfTasks = 0;
 let pomodosCounter = parseInt(sessionStorage.getItem("allPomodorosCounter")) || 1;
 let taskList = JSON.parse(localStorage.getItem("tasks")) || [];
 let baseWorkingTimer = 30;
+let colorSelectorMode = null;
+let acumulatedPomodoros = 0;
 
 //==============UTILITIES==================//
 //This takes input that has been translated to seconds and translates it back to minutes and seconds
@@ -104,21 +107,23 @@ function getInput(input) {
 //These are the states of the timer in the app
 function preWorking() {
   isWorking = true;
-  body.style.backgroundColor = "rgb(186, 73, 73)";
+  body.style.backgroundColor = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
   timeBtnStart.style.display = "block";
   timeBtnFF.style.display = "none";
   timeBtnPause.style.display = "none";
   taskContainer.style.display = "flex";
+  workModeBtn.style.backgroundColor = localStorage.getItem("workingColor") || "transparent";
 }
 
 function working() {
   isWorking = true;
-  body.style.backgroundColor = "rgb(186, 73, 73)";
+  body.style.backgroundColor = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
   timeBtnStart.style.display = "none";
   timeBtnFF.style.display = "block";
   timeBtnPause.style.display = "block";
   taskContainer.style.display = "block";
   title.style.display = "block";
+  workModeBtn.style.backgroundColor = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
 }
 
 function showWorkDarkModeUI() {
@@ -136,17 +141,21 @@ function preRestingShort() {
   timeBtnStart.style.display = "block";
   timeBtnFF.style.display = "none";
   timeBtnPause.style.display = "none";
-  body.style.backgroundColor = "green";
+  body.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "green";
   taskContainer.style.display = "block";
+  shortBrakeModeBtn.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "rgba(55, 141, 55, 1)";
+  workModeBtn.style.backgroundColor = "transparent";
 }
 
 function restingShort() {
   isWorking = false;
-  body.style.backgroundColor = "green";
+  body.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "green";
   timeBtnStart.style.display = "none";
   timeBtnFF.style.display = "block";
   timeBtnPause.style.display = "block";
   taskContainer.style.display = "block";
+  shortBrakeColor.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "rgba(40, 104, 40, 1)";
+  workModeBtn.style.backgroundColor = "transparent";
 }
 
 function preRestingLong(){
@@ -155,18 +164,22 @@ function preRestingLong(){
   timeBtnStart.style.display = "block";
   timeBtnFF.style.display = "none";
   timeBtnPause.style.display = "none";
-  body.style.backgroundColor = "rgb(57, 112, 151)";
+  body.style.backgroundColor = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
   taskContainer.style.display = "block";
+  longBrakeModeBtn.style.backgroundColor = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
+  workModeBtn.style.backgroundColor = "transparent";
 }
 
 function restingLong(){
   isWorking = false;
   isRestingLong = true;
-  body.style.backgroundColor = "rgb(57, 112, 151)";
+  body.style.backgroundColor = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
   timeBtnStart.style.display = "none";
   timeBtnFF.style.display = "block";
   timeBtnPause.style.display = "block";
   taskContainer.style.display = "block";
+  longBrakeColor.style.backgroundColor = localStorage.getItem("longBrakeColor") || "rgba(40, 40, 104, 1)";
+  workModeBtn.style.backgroundColor = "transparent";
 }
 
 
@@ -174,29 +187,34 @@ function restingLong(){
 //States that have to do with pausing
 function pauseCountdownWork() {
   isPaused = true;
-  timeBtnPause.innerText = "Resume";
-  body.style.backgroundColor = "rgb(186, 73, 73)";
+  timeBtnPause.innerText = "START";
+  localStorage.getItem("workingColor") ? body.style.backgroundColor = localStorage.getItem("workingColor") : body.style.backgroundColor = "rgb(186, 73, 73)";
   taskContainer.style.display = "flex";
   title.style.display = "block";
   timeBtnPause.style.background = "white";
   timeBtnPause.style.borderRadius = "5px";
-  timeBtnPause.style.color = "indianred";
+  timeBtnPause.style.color ? body.style.backgroundColor = localStorage.getItem("workingColor") : body.style.backgroundColor = "rgb(186, 73, 73)";
 }
 
 function resumeCountdownWork() {
   isPaused = false;
-  timeBtnPause.innerText = "Pause";
-  body.style.backgroundColor = "rgb(186, 73, 73)";
+  timeBtnPause.innerText = "PAUSE";
+  localStorage.getItem("workingColor") ? body.style.backgroundColor = localStorage.getItem("workingColor") : body.style.backgroundColor = "rgb(186, 73, 73)";
   taskContainer.style.display = "block";
   title.style.display = "block";
-  timeBtnPause.style.background = "transparent";
-  timeBtnPause.style.color = "white";
+  if(darkModeCheck.checked){
+    timeBtnPause.style.background = "transparent";
+    timeBtnPause.style.color = "white";
+  }else{
+    timeBtnPause.style.background = "white";
+    timeBtnPause.style.color ? body.style.backgroundColor = localStorage.getItem("workingColor") : body.style.backgroundColor = "rgb(186, 73, 73)";
+  }
 }
 
 function pauseCountdownRestingShort() {
   isPaused = true;
   timeBtnPause.innerText = "Resume";
-  body.style.backgroundColor = "green";
+  localStorage.getItem("shortBrakeColor") ? body.style.backgroundColor = localStorage.getItem("shortBrakeColor") : body.style.backgroundColor = "green";
   taskContainer.style.display = "flex";
   title.style.display = "block";
   timeBtnPause.style.background = "white";
@@ -207,7 +225,7 @@ function pauseCountdownRestingShort() {
 function resumeCountdownRestingShort() {
   isPaused = false;
   timeBtnPause.innerText = "Pause";
-  body.style.backgroundColor = "green";
+  localStorage.getItem("shortBrakeColor") ? body.style.backgroundColor = localStorage.getItem("shortBrakeColor") : body.style.backgroundColor = "green";
   taskContainer.style.display = "block";
   title.style.display = "block";
   timeBtnPause.style.background = "transparent";
@@ -218,18 +236,19 @@ function resumeCountdownRestingShort() {
 function pauseCountdownRestingLong() {
   isPaused = true;
   timeBtnPause.innerText = "Resume";
-  body.style.backgroundColor = "rgb(57, 112, 151)";
+  localStorage.getItem("longBrakeColor") ? body.style.backgroundColor = localStorage.getItem("longBrakeColor") : body.style.backgroundColor = "rgb(57, 112, 151)";
   taskContainer.style.display = "flex";
   title.style.display = "block";
   timeBtnPause.style.background = "white";
   timeBtnPause.style.borderRadius = "5px";
   timeBtnPause.style.color = "indianred";
+  timeBtnPause.style.boxShadow = "rgb(235, 235, 235) 0px 6px 0px";
 }
 
 function resumeCountdownRestingLong() {
   isPaused = false;
   timeBtnPause.innerText = "Pause";
-  body.style.backgroundColor = "rgb(57, 112, 151)";
+  localStorage.getItem("longBrakeColor") ? body.style.backgroundColor = localStorage.getItem("longBrakeColor") : body.style.backgroundColor = "rgb(57, 112, 151)";
   taskContainer.style.display = "block";
   title.style.display = "block";
   timeBtnPause.style.background = "transparent";
@@ -251,6 +270,8 @@ countdownDisplay.value = updateTimer(parseInt(timeInput.value * 60));
 //Spliting the timer function into workTimer(), restTimer() and longRestTimer()
 
 function startWorkTimer(duration, restDuration, longRestDuration){
+  timeBtnPause.innerText = "PAUSE";
+  timeBtnPause.style.boxShadow = "0px 0px 0px";
   updateTimer(duration);
     countdown = setInterval(function () {
       if (!isPaused) {
@@ -264,6 +285,7 @@ function startWorkTimer(duration, restDuration, longRestDuration){
         alarmSoundSelector();
         clearInterval(countdown);
         isWorking = false;
+        workModeBtn.style.backgroundColor = "transparent";
         if(updateRestInterval()){
           preRestingLong();
           updateTimer(longRestDuration);
@@ -304,12 +326,14 @@ function startRestTimer(duration, restDuration, longRestDuration){
           updateTimer(duration);
           startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
           updatePomodorosCounter();
+          workModeBtn.style.backgroundColor = "transparent";
         }else if(restDuration == 0){
           alarmSoundSelector();
           clearInterval(restCountdown);
           isWorking = true;
           preWorking();
           updateTimer(duration);
+
         }
       }, 1000);
 }
@@ -492,6 +516,7 @@ function renderTask(task) {
     taskContainer.removeChild(taskDiv);
     taskList = taskList.filter(t => t.id !== id);
     saveTasks();
+    acumulatedPomodoros -= pomodorosToDo;
   })
 
   taskDiv.addEventListener("click", () => {
@@ -540,6 +565,10 @@ function renderTask(task) {
 function addTask() {
   const name = taskInput.value.trim();
   const pomodorosToDo = parseInt(amountOfPomodorosInput.value, 10);
+
+  acumulatedPomodoros += pomodorosToDo;
+  acumulatedPomodorosView.innerText = acumulatedPomodoros;
+  document.querySelector(".timeOfFinishingWork").innerText = formatTime(pomodorosToDo * baseWorkingTimer * 60 + Date.now() / 1000);
 
   if (!name || isNaN(pomodorosToDo) || pomodorosToDo <= 0) {
     alert("Please enter a task name and a positive number of Pomodoros.");
@@ -629,8 +658,43 @@ function tickingSoundMod(){
 function toggleColorSelector(){
   if (colorSelector.style.display === "none" || colorSelector.style.display === "") {
     colorSelector.style.display = "block";
+    colorSelectorContainer.style.display = "flex";
+    colorSelectorContainer.style.flexDirection = "column";
   } else {
     colorSelector.style.display = "none";
+    colorSelectorContainer.style.display = "none";
+  }
+}
+
+function colorSelectorDivs(button) {
+  const color = button.dataset.color;
+  if (colorSelectorMode === "working") {
+    localStorage.setItem("workingColor", color);
+    workingColor.style.backgroundColor = color;
+    if(isWorking){
+      body.style.backgroundColor = color;
+      workModeBtn.style.backgroundColor = color;
+      shortBrakeModeBtn.style.backgroundColor = "transparent";
+      longBrakeModeBtn.style.backgroundColor = "transparent";
+    }
+  } else if (colorSelectorMode === "shortBrake") {
+    localStorage.setItem("shortBrakeColor", color);
+    shortBrakeColor.style.backgroundColor = color;
+    if(!isWorking && !isRestingLong){
+    body.style.backgroundColor = color;
+    shortBrakeModeBtn.style.backgroundColor = color;
+    workModeBtn.style.backgroundColor = "transparent";
+    longBrakeModeBtn.style.backgroundColor = "transparent";
+    }
+  } else if (colorSelectorMode === "longBrake") {
+    localStorage.setItem("longBrakeColor", color);
+    longBrakeColor.style.backgroundColor = color;
+    if(!isWorking && isRestingLong){
+      body.style.backgroundColor = color;
+      longBrakeModeBtn.style.backgroundColor = color;
+      workModeBtn.style.backgroundColor = "transparent";
+      shortBrakeModeBtn.style.backgroundColor = "transparent";
+    }
   }
 }
 
@@ -645,31 +709,26 @@ exitSettingsButton.addEventListener("click", function () {
   overlay.style.display = "none";
 });
 
-document.addEventListener("click", function (event) {
-
-  const clickedInsideColorSelector =
-    colorSelector.contains(event.target) ||
-    workingColor.contains(event.target) ||
-    shortBrakeColor.contains(event.target) ||
-    longBrakeColor.contains(event.target);
-
-  const clickedInsideSettings =
-    settings.contains(event.target) || settingsScreen.contains(event.target);
-
-  // CLOSE COLOR SELECTOR if clicked outside it and outside color buttons
-  if (!clickedInsideColorSelector) {
+colorSelectorContainer.addEventListener("click", function (event) {
+  event.stopPropagation();
+  if(colorSelectorContainer.contains(event.target)){
     colorSelector.style.display = "none";
-  }
-
-  // CLOSE SETTINGS SCREEN if clicked outside settings and settings screen
-  if (!clickedInsideSettings) {
-    settingsScreen.style.display = "none";
-    overlay.style.display = "none";
+    colorSelectorContainer.style.display = "none";
+    settingsScreen.style.display = "block";
     overlay.style.alignItems = "flex-start";
+    colorSelectorMode = null;
   }
 });
 
-
+overlay.addEventListener("click", function(event){
+  event.stopPropagation();
+  if(!settingsScreen.contains(event.target)){
+    settingsScreen.style.display = "none";
+    overlay.style.display = "none";
+    colorSelector.style.display = "none";
+    colorSelectorContainer.style.display = "none";
+  }
+})
 
 // Color selector
 workingColor.addEventListener("click", function () { 
@@ -677,6 +736,7 @@ workingColor.addEventListener("click", function () {
   toggleColorSelector();
   settingsScreen.style.display = "none";
   overlay.style.alignItems = "center";
+  colorSelectorMode = "working";
 });
 
 shortBrakeColor.addEventListener("click", function () { 
@@ -684,6 +744,7 @@ shortBrakeColor.addEventListener("click", function () {
   toggleColorSelector();
   settingsScreen.style.display = "none";
   overlay.style.alignItems = "center";
+  colorSelectorMode = "shortBrake";
 });
 
 longBrakeColor.addEventListener("click", function () { 
@@ -691,6 +752,7 @@ longBrakeColor.addEventListener("click", function () {
   toggleColorSelector();
   settingsScreen.style.display = "none";
   overlay.style.alignItems = "center";
+  colorSelectorMode = "longBrake";
 });
 
 //  Save input values when Ok is clicked in the settings menu
@@ -754,6 +816,7 @@ timeBtnFF.addEventListener("click", function () {
     if(updateRestInterval()){
       updateTimer(longRestDuration);
       preRestingLong();
+      workModeBtn.style.backgroundColor = "transparent";
     }else{
       updateTimer(restDuration);
       preRestingShort();
@@ -766,11 +829,13 @@ timeBtnFF.addEventListener("click", function () {
       preWorking();
       isWorking = true;
       isRestingLong = false;
+      longBrakeModeBtn.style.backgroundColor = "transparent";
     }else{
       clearInterval(restCountdown);
       updateTimer(duration);
       preWorking();
       isWorking = true;
+      shortBrakeModeBtn.style.backgroundColor = "transparent";
     }
   }
   saveTasks()
@@ -869,6 +934,15 @@ alarmVolumeSlider.oninput = function(){
 window.addEventListener("DOMContentLoaded", () => {
   pomodorosCounter.innerText = pomodosCounter;
   //Load saved values from local storage 
+
+if (isWorking && localStorage.getItem("workingColor")) {
+  body.style.backgroundColor = localStorage.getItem("workingColor");
+} else if (!isWorking && isRestingLong && localStorage.getItem("longBrakeColor")) {
+  body.style.backgroundColor = localStorage.getItem("longBrakeColor");
+} else if (!isWorking && !isRestingLong && localStorage.getItem("shortBrakeColor")) {
+  body.style.backgroundColor = localStorage.getItem("shortBrakeColor");
+}
+
 
   //  Inputs
   timeInput.value = localStorage.getItem("timeInput") || 25;

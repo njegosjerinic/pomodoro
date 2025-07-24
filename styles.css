@@ -191,7 +191,7 @@ p{
     width: 400px;
     background: white;
     border-radius: 10px;
-    margin-top: 50px;
+    margin: 50px 0;
 }
 
 .settings-screen select{
@@ -464,6 +464,7 @@ input:checked + .slider:before {
     display: flex;
     justify-content: space-around;
     align-items: center;
+    gap: 10px;
 }
 
 .ticking-settings{
@@ -678,14 +679,33 @@ input:checked + .slider:before {
 }
 
 #addTaskBtn{
+    box-sizing: border-box;
     width: 460px;
-    height: 70px;
-    background: transparent;
-    color: white;
-    font-size: large;
-    border: 1px solid white;
-    border-radius: 10px;
+    height: 64px;
+    background-color: rgba(0,0,0,0.1);
+    border-radius: 8px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
     cursor: pointer;
+    opacity: 0.8;
+    margin-top: 12px;
+    border: dashed 2px rgba(255,255,255,0.4);
+}
+
+#addTaskBtn p{
+    opacity: 0.8;
+    font-weight: bold;
+    color: white;
 }
 
 #addTaskPanel{
@@ -706,10 +726,19 @@ input:checked + .slider:before {
     font-weight: 600;
 }
 
+.taskCreationInputs{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: space-evenly;
+    height: 80%;
+}
+
 .taskCreationButtons{
     width: 100%;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
+    flex-direction: row-reverse;
     gap: 20px;
 }
 
@@ -851,6 +880,14 @@ input:checked + .slider:before {
     width: 40px;
 }
 
+.color-selector-container{
+    position: relative;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
 .color-title{
     display: -webkit-box;
     display: -webkit-flex;
@@ -872,7 +909,7 @@ input:checked + .slider:before {
 
 .color-selector{
     display: none; 
-    position: absolute;
+    position: relative;
     flex-direction: row;
     align-items: center;
     width: 400px;
@@ -906,6 +943,26 @@ input:checked + .slider:before {
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
+}
+
+.estimatedPomodorosContainer{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 40px;
+    width: 460px;
+    margin-top: 28px;
+    background-color: rgba(0,0,0,0.1);
+    padding: 18px 12px;
+    border-top: 1px solid rgba(255,255,255,0.8);
+    -ms-flex-pack: justify;
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    text-align: center;
+    background-color: rgba(255,255,255,0.1);
 }
 
 
