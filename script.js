@@ -14,6 +14,9 @@ const acumulatedPomodorosView = document.querySelector(".acumulatedPomodoros");
 const acumulatedPomodorosDoneView = document.querySelector(".acumulatedPomodorosDone");
 const timeOfFinishingWork = document.querySelector(".timeOfFinishingWork");
 const currentProject = document.getElementById("currentProject");
+const progressBar = document.querySelector(".pomodoor-progress");
+const progressToCompletion = document.querySelector(".progress");
+
 
 //  Inputs
 const taskInput = document.getElementById("taskInput");
@@ -38,6 +41,10 @@ const longBrakeModeBtn = document.getElementById("longBrakeBtn");
 const workingColor = document.getElementById("workingColor");
 const shortBrakeColor = document.getElementById("shortbreakColor");
 const longBrakeColor = document.getElementById("longbreakColor");
+const generalTaskSettings = document.getElementById("generalTaskSettings");
+const clearFinishedTasks = document.getElementById("clearFinishedTasks");
+const clearAllTasks = document.getElementById("clearAllTasks");
+const smallWindowOpenBtn = document.getElementById("smallWindowOpenBtn");
 
 //  Checkboxes
 const autoStartBreaksCheck = document.getElementById("autoStartBreaksSlider");
@@ -63,15 +70,19 @@ const addTaskPanel = document.getElementById("addTaskPanel");
 const overlay = document.getElementById("overlay");
 const colorSelector = document.querySelector(".color-selector");
 const colorSelectorContainer = document.querySelector(".color-selector-container");
+const generalTaskSettingsScreen = document.querySelector(".generalTaskSettingsScreen");
+generalTaskSettingsScreen.style.display = "none";
 
 // Audios for alarm
 const kitchenAudio = new Audio("audiomass-output.mp3");
 const bellAudio = new Audio("bellAudio.mp3");
 
 // Audios for ticking
-
 const slowTickingSound = new Audio("usedSlowClock.mp3");
 const fastTickingSound = new Audio("usedFastClock.mp3");
+
+// Clicking start
+const startingCLick = new Audio("clickingStart.wav")
 
 // --- App State ---
 let countdown;
@@ -93,7 +104,12 @@ let acumulatedPomodorosDone = 0;
 function formatTime(seconds) {
   const minutes = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  return `${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+  const w = window.innerWidth;
+  if(w <= 200){
+    return `${minutes}`
+  }else{
+    return `${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+  }
 }
 
 //Gets input and transforms it into seconds
@@ -111,21 +127,23 @@ function preWorking() {
   isWorking = true;
   body.style.backgroundColor = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
   timeBtnStart.style.display = "block";
+  timeBtnStart.style.color = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
   timeBtnFF.style.display = "none";
   timeBtnPause.style.display = "none";
   taskContainer.style.display = "flex";
-  workModeBtn.style.backgroundColor = localStorage.getItem("workingColor") || "transparent";
+  workModeBtn.style.backgroundColor = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
 }
 
 function working() {
   isWorking = true;
   body.style.backgroundColor = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
   timeBtnStart.style.display = "none";
+  timeBtnStart.style.color = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
   timeBtnFF.style.display = "block";
   timeBtnPause.style.display = "block";
   timeBtnPause.style.color = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
   taskContainer.style.display = "block";
-  title.style.display = "block";
+  title.style.display = "flex";
   workModeBtn.style.backgroundColor = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
   estimatedPomodorosContainer.style.display = "flex";
   
@@ -152,6 +170,7 @@ function showWorkDarkModeUI() {
 function preRestingShort() {
   isWorking = false;
   timeBtnStart.style.display = "block";
+  timeBtnStart.style.color = localStorage.getItem("shortBrakeColor") || "rgba(55, 141, 55, 1)";
   timeBtnFF.style.display = "none";
   timeBtnPause.style.display = "none";
   body.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "green";
@@ -172,6 +191,7 @@ function restingShort() {
   isWorking = false;
   body.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "green";
   timeBtnStart.style.display = "none";
+  timeBtnStart.style.color = localStorage.getItem("shortBrakeColor") || "rgba(55, 141, 55, 1)";
   timeBtnFF.style.display = "block";
   timeBtnPause.style.display = "block";
   taskContainer.style.display = "block";
@@ -181,6 +201,7 @@ function restingShort() {
   addTaskBtn.style.display = "block";
   workModeBtn.style.display = "block";
   shortBrakeModeBtn.style.display = "block";
+  shortBrakeModeBtn.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "rgba(55, 141, 55, 1)";
   longBrakeModeBtn.style.display = "block";
   timerBackground.style.background = "rgba(255, 255, 255, 0.1)";
   timeBtnPause.style.background = "white";
@@ -191,6 +212,7 @@ function preRestingLong(){
   isWorking = false;
   isRestingLong = true;
   timeBtnStart.style.display = "block";
+  timeBtnStart.style.color = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
   timeBtnFF.style.display = "none";
   timeBtnPause.style.display = "none";
   body.style.backgroundColor = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
@@ -202,6 +224,7 @@ function preRestingLong(){
   workModeBtn.style.display = "block";
   shortBrakeModeBtn.style.display = "block";
   longBrakeModeBtn.style.display = "block";
+  longBrakeModeBtn.style.backgroundColor = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
   timerBackground.style.background = "rgba(255, 255, 255, 0.1)";
   timeBtnPause.style.background = "white";
   timeBtnPause.style.color = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
@@ -212,16 +235,18 @@ function restingLong(){
   isRestingLong = true;
   body.style.backgroundColor = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
   timeBtnStart.style.display = "none";
+  timeBtnStart.style.color = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
   timeBtnFF.style.display = "block";
   timeBtnPause.style.display = "block";
   taskContainer.style.display = "block";
-  longBrakeColor.style.backgroundColor = localStorage.getItem("longBrakeColor") || "rgba(40, 40, 104, 1)";
+  longBrakeColor.style.backgroundColor = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
   workModeBtn.style.backgroundColor = "transparent";
   estimatedPomodorosContainer.style.display = "flex";
   addTaskBtn.style.display = "block";
   workModeBtn.style.display = "block";
   shortBrakeModeBtn.style.display = "block";
   longBrakeModeBtn.style.display = "block";
+  longBrakeModeBtn.style.backgroundColor = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
   timerBackground.style.background = "rgba(255, 255, 255, 0.1)";
   timeBtnPause.style.background = "white";
   timeBtnPause.style.color = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
@@ -235,11 +260,12 @@ function pauseCountdownWork() {
   timeBtnPause.innerText = "START";
   localStorage.getItem("workingColor") ? body.style.backgroundColor = localStorage.getItem("workingColor") : body.style.backgroundColor = "rgb(186, 73, 73)";
   taskContainer.style.display = "flex";
-  title.style.display = "block";
+  title.style.display = "flex";
   timeBtnPause.style.background = "white";
   timeBtnPause.style.borderRadius = "5px";
   timeBtnPause.style.color ? body.style.backgroundColor = localStorage.getItem("workingColor") : body.style.backgroundColor = "rgb(186, 73, 73)";
-  timeBtnPause
+  timeBtnPause.style.boxShadow = "rgb(235, 235, 235) 0px 6px 0px"
+  timeBtnFF.style.display = "none";
   estimatedPomodorosContainer.style.display = "flex";
   addTaskBtn.style.display = "block";
   workModeBtn.style.display = "block";
@@ -247,7 +273,7 @@ function pauseCountdownWork() {
   longBrakeModeBtn.style.display = "block";
   timerBackground.style.background = "rgba(255, 255, 255, 0.1)";
   timeBtnPause.style.background = "white";
-  timeBtnPause.style.color = localStorage.getItem("longBrakeColor") || "rgb(186, 73, 73)";
+  timeBtnPause.style.color = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
 }
 
 function resumeCountdownWork() {
@@ -255,7 +281,7 @@ function resumeCountdownWork() {
   timeBtnPause.innerText = "PAUSE";
   localStorage.getItem("workingColor") ? body.style.backgroundColor = localStorage.getItem("workingColor") : body.style.backgroundColor = "rgb(186, 73, 73)";
   taskContainer.style.display = "block";
-  title.style.display = "block";
+  title.style.display = "flex";
   if(darkModeCheck.checked){
     timeBtnPause.style.background = "transparent";
     timeBtnPause.style.color = "white";
@@ -270,51 +296,82 @@ function resumeCountdownWork() {
   longBrakeModeBtn.style.display = "block";
   timerBackground.style.background = "rgba(255, 255, 255, 0.1)";
   timeBtnPause.style.background = "white";
-  timeBtnPause.style.color = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
+  timeBtnPause.style.color = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
+  timeBtnPause.style.boxShadow = " 0px 0px 0px"
 }
 
 function pauseCountdownRestingShort() {
   isPaused = true;
-  timeBtnPause.innerText = "Resume";
-  localStorage.getItem("shortBrakeColor") ? body.style.backgroundColor = localStorage.getItem("shortBrakeColor") : body.style.backgroundColor = "green";
+  timeBtnPause.innerText = "START";
   taskContainer.style.display = "flex";
-  title.style.display = "block";
+  title.style.display = "flex";
   timeBtnPause.style.background = "white";
   timeBtnPause.style.borderRadius = "5px";
-  timeBtnPause.style.color = "indianred";
+  estimatedPomodorosContainer.style.display = "flex";
+  addTaskBtn.style.display = "block";
+  workModeBtn.style.display = "block";
+  shortBrakeModeBtn.style.display = "block";
+  longBrakeModeBtn.style.display = "block";
+  timerBackground.style.background = "rgba(255, 255, 255, 0.1)";
+  timeBtnPause.style.background = "white";
+  timeBtnPause.style.color = localStorage.getItem("shortBrakeColor") || "rgba(55, 141, 55, 1)";
+  timeBtnPause.style.boxShadow = "rgb(235, 235, 235) 0px 6px 0px";
+  timeBtnFF.style.display = "none";
 }
 
 function resumeCountdownRestingShort() {
   isPaused = false;
-  timeBtnPause.innerText = "Pause";
-  localStorage.getItem("shortBrakeColor") ? body.style.backgroundColor = localStorage.getItem("shortBrakeColor") : body.style.backgroundColor = "green";
+  timeBtnPause.innerText = "PAUSE";
   taskContainer.style.display = "block";
-  title.style.display = "block";
-  timeBtnPause.style.background = "transparent";
-  timeBtnPause.style.color = "white";
+  title.style.display = "flex";
+  estimatedPomodorosContainer.style.display = "flex";
+  addTaskBtn.style.display = "block";
+  workModeBtn.style.display = "block";
+  shortBrakeModeBtn.style.display = "block";
+  longBrakeModeBtn.style.display = "block";
+  timerBackground.style.background = "rgba(255, 255, 255, 0.1)";
+  timeBtnPause.style.background = "white";
+  timeBtnPause.style.color = localStorage.getItem("shortBrakeColor") || "rgba(55, 141, 55, 1)";
+  timeBtnPause.style.boxShadow = " 0px 0px 0px";
+  timeBtnFF.style.display = "block";
 }
 
 
 function pauseCountdownRestingLong() {
   isPaused = true;
-  timeBtnPause.innerText = "Resume";
-  localStorage.getItem("longBrakeColor") ? body.style.backgroundColor = localStorage.getItem("longBrakeColor") : body.style.backgroundColor = "rgb(57, 112, 151)";
+  timeBtnPause.innerText = "START";
   taskContainer.style.display = "flex";
-  title.style.display = "block";
+  title.style.display = "flex";
   timeBtnPause.style.background = "white";
   timeBtnPause.style.borderRadius = "5px";
-  timeBtnPause.style.color = "indianred";
+
+  estimatedPomodorosContainer.style.display = "flex";
+  addTaskBtn.style.display = "block";
+  workModeBtn.style.display = "block";
+  shortBrakeModeBtn.style.display = "block";
+  longBrakeModeBtn.style.display = "block";
+  timerBackground.style.background = "rgba(255, 255, 255, 0.1)";
+  timeBtnPause.style.background = "white";
+  timeBtnPause.style.color = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
   timeBtnPause.style.boxShadow = "rgb(235, 235, 235) 0px 6px 0px";
+  timeBtnFF.style.display = "none";
 }
 
 function resumeCountdownRestingLong() {
   isPaused = false;
-  timeBtnPause.innerText = "Pause";
-  localStorage.getItem("longBrakeColor") ? body.style.backgroundColor = localStorage.getItem("longBrakeColor") : body.style.backgroundColor = "rgb(57, 112, 151)";
+  timeBtnPause.innerText = "PAUSE";
   taskContainer.style.display = "block";
-  title.style.display = "block";
-  timeBtnPause.style.background = "transparent";
-  timeBtnPause.style.color = "white";
+  title.style.display = "flex";
+  estimatedPomodorosContainer.style.display = "flex";
+  addTaskBtn.style.display = "block";
+  workModeBtn.style.display = "block";
+  shortBrakeModeBtn.style.display = "block";
+  longBrakeModeBtn.style.display = "block";
+  timerBackground.style.background = "rgba(255, 255, 255, 0.1)";
+  timeBtnPause.style.background = "white";
+  timeBtnPause.style.color = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
+  timeBtnPause.style.boxShadow = " 0px 0px 0px"
+  timeBtnFF.style.display = "block";
 }
 
 function updateRestInterval(){
@@ -340,7 +397,10 @@ function startWorkTimer(duration, restDuration, longRestDuration){
         duration--;
         updateTimer(duration);
         darkModeCheck.checked ? showWorkDarkModeUI() :  working();
-        tickingSoundMod()
+        tickingSoundMod();
+        progressBarUpdate(duration,getInput(timeInput.value));
+        localStorage.setItem("countdown", duration);
+        localStorage.setItem("isWorking", isWorking);
       }
 
       if (duration == 0 && autoStartBreaksCheck.checked) {
@@ -357,6 +417,7 @@ function startWorkTimer(duration, restDuration, longRestDuration){
           updateTimer(restDuration);
           startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value))
         }
+        progressToCompletion.style.width = "0%";
       }else if(duration == 0){
         alarmSoundSelector();
         clearInterval(countdown);
@@ -368,8 +429,10 @@ function startWorkTimer(duration, restDuration, longRestDuration){
           preRestingShort();
           updateTimer(restDuration);
         }
+        progressToCompletion.style.width = "0%";
       }
     }, 1000);
+    
 }
 
 function startRestTimer(duration, restDuration, longRestDuration){
@@ -378,6 +441,9 @@ function startRestTimer(duration, restDuration, longRestDuration){
           restDuration--;
           restingShort();
           updateTimer(restDuration);
+          progressBarUpdate(restDuration,getInput(timeRestInput.value));
+          localStorage.setItem("restCountdown", restDuration);
+          localStorage.setItem("isWorking", isWorking);
         }
 
         if (restDuration == 0 && autoStartPomodorosCheck.checked) {
@@ -388,14 +454,17 @@ function startRestTimer(duration, restDuration, longRestDuration){
           updateTimer(duration);
           startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
           updatePomodorosCounter();
+          shortBrakeModeBtn.style.backgroundColor = "transparent";
           workModeBtn.style.backgroundColor = "transparent";
+          progressToCompletion.style.width = "0%";
         }else if(restDuration == 0){
           alarmSoundSelector();
           clearInterval(restCountdown);
           isWorking = true;
           preWorking();
           updateTimer(duration);
-
+          progressToCompletion.style.width = "0%";
+          shortBrakeModeBtn.style.backgroundColor = "transparent";
         }
       }, 1000);
 }
@@ -406,6 +475,9 @@ function startLongRestTimer(duration, restDuration, longRestDuration){
           longRestDuration--;
           restingLong();
           updateTimer(longRestDuration);
+          progressBarUpdate(longRestDuration,getInput(longBreakInput.value));
+          localStorage.setItem("longRestCountdown", longRestDuration);
+          localStorage.setItem("isWorking", isWorking);
         }
 
         if (longRestDuration == 0) {
@@ -414,6 +486,9 @@ function startLongRestTimer(duration, restDuration, longRestDuration){
           isWorking = true;
           preWorking();
           updateTimer(duration);
+          progressToCompletion.style.width = "0%";
+          longBrakeModeBtn.style.backgroundColor = "transparent";
+          shortBrakeModeBtn.style.backgroundColor = "transparent";  
         }
       }, 1000);
 }
@@ -498,6 +573,12 @@ function renderTask(task) {
 
   const settingsTaskInput = createElement("input");
   settingsTaskInput.value = task.name;
+  settingsTaskInput.style.fontSize = "x-large";
+  settingsTaskInput.style.border = "none";
+  settingsTaskInput.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
+
   settingsTaskInput.style.display = "none";
 
   const settingsPomodorosInput = createElement("input");
@@ -517,7 +598,8 @@ function renderTask(task) {
   taskModInputPanel.style.display = "flex";
   taskModInputPanel.style.flexDirection = "column";
   taskModInputPanel.style.alignItems = "flex-start";
-  taskModInputPanel.style.justifyContent = "space-between"
+  taskModInputPanel.style.gap = "50px"
+  taskModInputPanel.style.padding = "20px";
 
   const buttonsForManipulationDiv = document.createElement("div");
   const saveAndCancelDiv = document.createElement("div");
@@ -528,9 +610,32 @@ function renderTask(task) {
   const cancelTaskEditBtn = document.createElement("button");
   cancelTaskEditBtn.innerText = "cancel";
   cancelTaskEditBtn.className = "task-mod-buttons";
+
   const saveTaskEditBtn = document.createElement("button");
   saveTaskEditBtn.innerHTML = "save";
   saveTaskEditBtn.className = "task-mod-buttons-save";
+
+  saveTaskEditBtn.addEventListener("click", function(e){
+    e.stopPropagation();
+    taskDesc.innerText = settingsTaskInput.value;
+    task.name = settingsTaskInput.value;
+    task.pomodorosToDo = parseInt(settingsPomodorosInput.value, 10);
+    pomodoroCounterForTaskModificationDiv.innerText = task.donePomodoros;
+    settingsPomodorosInput.value = task.pomodorosToDo;
+    taskTime.innerText = `${task.donePomodoros} / ${task.pomodorosToDo}`;;
+    acumulatedPomodorosView.innerText =  acumulatedPomodoros + settingsPomodorosInput.value;
+    localStorage.setItem("acumulatedPomodoros", acumulatedPomodoros);
+    taskDiv.style.height = "70px";
+    taskDiv.style.flexDirection = "row";
+    taskDonenes.style.display = "flex";
+    settingsTaskInput.style.display = "none";
+    taskDesc.style.display = "flex";
+    taskContent.style.display = "flex";
+    taskModPanel.style.display = "none";
+    taskDonenesAndName.style.display = "flex";
+    localStorage.setItem("tasks", JSON.stringify(taskList));
+    updatePomodoroSummary();
+  });
 
   saveAndCancelDiv.append(cancelTaskEditBtn,saveTaskEditBtn);
 
@@ -551,7 +656,7 @@ function renderTask(task) {
   taskSettingsButton.addEventListener("click", (e) => {
     e.stopPropagation();
     taskDiv.style.height = "282px";
-    taskDiv.style.width = "455px";
+    taskDiv.style.width = "480px";
     taskDonenes.style.display = "none";
     settingsTaskInput.style.display = "block";
     taskDesc.style.display = "none"
@@ -560,7 +665,11 @@ function renderTask(task) {
     taskDiv.style.flexDirection = "column";
     taskDonenesAndName.style.display = "none";
     taskModPanel.style.display = "flex";
-    taskDiv.style.padding = "0"
+    taskDiv.style.padding = "0";
+    settingsTaskInput.focus();
+    settingsTaskInput.setSelectionRange(settingsTaskInput.value.length, settingsTaskInput.value.length);
+    settingsTaskInput.style.outline = "none";
+    taskDiv.style.border = "0";
   });
 
   cancelTaskEditBtn.addEventListener("click", function(e){
@@ -574,6 +683,9 @@ function renderTask(task) {
     taskDonenesAndName.style.display = "flex";
     taskModPanel.style.display = "flex";
     taskModPanel.style.display = "none";
+    if (task.isActive) {
+      taskDiv.style.borderLeft = "5px solid black";
+    }
   });
 
   deleteTaskBtn.addEventListener("click", function(e){
@@ -581,13 +693,12 @@ function renderTask(task) {
     taskContainer.removeChild(taskDiv);
     taskList = taskList.filter(t => t.id !== id);
     saveTasks();
+    if(acumulatedPomodoros >= 0){
     acumulatedPomodoros -= pomodorosToDo;
-    acumulatedPomodorosView.innerText = acumulatedPomodoros;
-    localStorage.setItem("acumulatedPomodoros", acumulatedPomodoros);
-    const finishTimestamp = Date.now() + acumulatedPomodoros * getInput(timeInput.value) * 1000;
-    const finishTime = new Date(finishTimestamp);
-    timeOfFinishingWork.innerText = finishTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: is24HourFormat() });
-    localStorage.setItem("timeOfFinishingWork", timeOfFinishingWork.innerText);
+    }else{
+      acumulatedPomodoros = 1;
+    }
+    updatePomodoroSummary();
   })
 
   taskDiv.addEventListener("click", () => {
@@ -631,6 +742,7 @@ function renderTask(task) {
   taskDiv.append(taskDonenesAndName, taskContent, taskModPanel);
 
   taskContainer.appendChild(taskDiv);
+  updatePomodoroSummary();
 }
 
 function addTask() {
@@ -666,6 +778,7 @@ function addTask() {
 
   taskInput.value = "";
   amountOfPomodorosInput.value = "1";
+  updatePomodoroSummary();
 }
 
 function updatePomodorosCounterPerTask() {
@@ -700,7 +813,7 @@ function taskCompletionCheck() {
       }
     }
   }
-
+  updatePomodoroSummary();
   saveTasks();
 }
 
@@ -778,10 +891,31 @@ function is24HourFormat() {
   return hourFormatSelection.value !== "24-hour";
 }
 
+function updatePomodoroSummary() {
+    acumulatedPomodorosView.innerText = acumulatedPomodoros;
+
+    const finishTimestamp = Date.now() + acumulatedPomodoros * getInput(timeInput.value) * 1000;
+    const finishTime = new Date(finishTimestamp);
+
+    timeOfFinishingWork.innerText = finishTime.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: is24HourFormat()
+    });
+
+    localStorage.setItem("timeOfFinishingWork", timeOfFinishingWork.innerText);
+    localStorage.setItem("acumulatedPomodoros", acumulatedPomodoros);
+}
+
+function progressBarUpdate(remeaningTime, totalTime){
+  const percent = 100 - ((remeaningTime / totalTime) * 100);
+  progressToCompletion.style.width = `${percent}%`;
+}
 //================================================================EVENT LISTENERS============================================================//
 settings.addEventListener("click", function () {
   settingsScreen.style.display = "block";
   overlay.style.display = "flex";
+    console.log(getInput(timeInput.value));
 });
 
 exitSettingsButton.addEventListener("click", function () {
@@ -869,14 +1003,7 @@ inputBtn.addEventListener("click", function () {
     updateTimer(getInput(localStorage.getItem("timeInput")));
   }
 
-  const finishTimestamp = Date.now() + acumulatedPomodoros * getInput(timeInput.value)  * 1000;
-  console.log(finishTimestamp);
-  console.log(Date.now())
-  console.log(acumulatedPomodoros)
-  console.log(getInput(timeInput.value));
-  const finishTime = new Date(finishTimestamp);
-  timeOfFinishingWork.innerText = finishTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: is24HourFormat()  });
-  localStorage.setItem("timeOfFinishingWork", timeOfFinishingWork.innerText);
+  updatePomodoroSummary();
 });
 
 //  Starting the timer
@@ -893,6 +1020,7 @@ timeBtnStart.addEventListener("click", function () {
     taskCompletionCheck();
     updatePomodorosCounterPerTask();
   }
+  startingCLick.play();
 });
 
 //  Actions that the Fast Foward button does
@@ -900,35 +1028,53 @@ timeBtnFF.addEventListener("click", function () {
   const duration = getInput(timeInput.value);
   const restDuration = getInput(timeRestInput.value);
   const longRestDuration = getInput(timeLongRestInput.value);
+
+  progressToCompletion.style.width = "0%";
+
+  isRestingLong = updateRestInterval(); // Always update this dynamically
+
   if (isWorking) {
     clearInterval(countdown);
-    if(updateRestInterval()){
+    localStorage.setItem("countdown", duration);
+    isWorking = false;
+    localStorage.setItem("isWorking", isWorking);
+
+    if (isRestingLong) {
       updateTimer(longRestDuration);
+      localStorage.setItem("longRestCountdown", longRestDuration);
       preRestingLong();
       workModeBtn.style.backgroundColor = "transparent";
-    }else{
+    } else {
       updateTimer(restDuration);
+      localStorage.setItem("restCountdown", restDuration);
       preRestingShort();
     }
-    isWorking = false;
+
   } else {
-    if(updateRestInterval()){
+    if (isRestingLong) {
       clearInterval(longRestCountdown);
       updateTimer(duration);
+      localStorage.setItem("countdown", duration);
       preWorking();
       isWorking = true;
       isRestingLong = false;
+      localStorage.setItem("isWorking", isWorking);
+      localStorage.setItem("isRestingLong", isRestingLong);
       longBrakeModeBtn.style.backgroundColor = "transparent";
-    }else{
+    } else {
       clearInterval(restCountdown);
       updateTimer(duration);
+      localStorage.setItem("countdown", duration);
       preWorking();
       isWorking = true;
+      localStorage.setItem("isWorking", isWorking);
       shortBrakeModeBtn.style.backgroundColor = "transparent";
     }
   }
-  saveTasks()
+
+  saveTasks();
 });
+
 
 //  Code for pausing
 
@@ -936,6 +1082,7 @@ timeBtnPause.addEventListener("click", function () {
   if(isWorking){
   if (isPaused) {
     resumeCountdownWork();
+    startingCLick.play();
   } else {
     pauseCountdownWork();
   }
@@ -943,12 +1090,14 @@ timeBtnPause.addEventListener("click", function () {
     if(updateRestInterval()){
       if (isPaused) {
         resumeCountdownRestingLong();
+        startingCLick.play();
       } else {
         pauseCountdownRestingLong();
       }
     }else{
       if (isPaused) {
         resumeCountdownRestingShort();
+        startingCLick.play();
       } else {
         pauseCountdownRestingShort();
       }
@@ -1037,14 +1186,42 @@ alarmVolumeSlider.oninput = function(){
   localStorage.setItem("alarmValue", this.value);
 }
 
+generalTaskSettings.addEventListener("click", function () {
+  if(generalTaskSettingsScreen.style.display === "none"){
+  generalTaskSettingsScreen.style.display = "flex";
+  }else{
+    generalTaskSettingsScreen.style.display = "none";
+  }
+});
+
+document.addEventListener("click", function (event) {
+  if (!generalTaskSettings.contains(event.target) && !generalTaskSettingsScreen.contains(event.target) && generalTaskSettingsScreen.style.display === "flex") {
+    generalTaskSettingsScreen.style.display = "none";
+  }
+});
+
+clearFinishedTasks.addEventListener("click", function () {
+  taskList = taskList.filter(task => !task.isChecked);
+  saveTasks();
+  updatePomodoroSummary();
+})
+
+clearAllTasks.addEventListener("click", function () {
+  taskList = [];
+  saveTasks();
+  taskContainer.innerHTML = ""; 
+  generalTaskSettingsScreen.style.display = "none";
+  updatePomodoroSummary();
+});
+
+smallWindowOpenBtn.addEventListener("click", function () {
+  window.open("index.html", "Pomodoro Timer", "width=200,height=1000,scrollbars=no,resizable=no");
+}); 
+
 window.addEventListener("DOMContentLoaded", () => {
   pomodorosCounter.innerText = pomodosCounter;
-  if(acumulatedPomodoros <= acumulatedPomodorosDone){
-    acumulatedPomodoros = acumulatedPomodorosDone + 1;
-    localStorage.setItem("acumulatedPomodoros", acumulatedPomodoros);
-  }else{
-    acumulatedPomodoros = parseInt(localStorage.getItem("acumulatedPomodoros")) || 0;
-  }
+  let acumulatedPomodoros = Number(localStorage.getItem("acumulatedPomodoros")) || 0;
+
   acumulatedPomodorosDone = parseInt(localStorage.getItem("acumulatedPomodorosDone")) || 0;
   acumulatedPomodorosDoneView.innerText = acumulatedPomodorosDone;
   acumulatedPomodorosView.innerText = acumulatedPomodoros;
@@ -1112,7 +1289,34 @@ if (isWorking && localStorage.getItem("workingColor")) {
   tickingValue.innerText = localStorage.getItem("tickingValue") || 50;
 
   //On-start
-  const initialTime = getInput(timeInput.value);
-  if (initialTime) updateTimer(initialTime);
+  let initialTime = getInput(timeInput.value);
+  let durationCountdown = parseInt(localStorage.getItem("countdown")) || 0;
+  let restDurationCountdown = parseInt(localStorage.getItem("restCountdown")) || 0;
+  let longRestDurationCountdown = parseInt(localStorage.getItem("longRestCountdown")) || 0;
+  isWorking = localStorage.getItem("isWorking") === "true";
+  isRestingLong = updateRestInterval();
+  if (isWorking && durationCountdown < initialTime) {
+    updateTimer(durationCountdown);
+    startWorkTimer(durationCountdown, getInput(timeRestInput.value), getInput(longBreakInput.value));
+    working();
+  }else if(!isWorking && isRestingLong && longRestDurationCountdown < getInput(timeLongRestInput.value)){
+    updateTimer(longRestDurationCountdown);
+    startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), longRestDurationCountdown);
+    restingLong();
+  }else if(!isWorking && !isRestingLong && restDurationCountdown < getInput(timeRestInput.value)){
+    updateTimer(restDurationCountdown);
+    startRestTimer(getInput(timeInput.value), restDurationCountdown, getInput(longBreakInput.value));
+    restingShort();
+  }else if(isWorking && durationCountdown){
+    updateTimer(initialTime);
+    preWorking();
+  }else if(!isWorking && isRestingLong && longRestDurationCountdown){
+    updateTimer(longRestDurationCountdown);
+    preRestingLong();
+  }
+  else if(!isWorking && !isRestingLong && restDurationCountdown){
+    updateTimer(restDurationCountdown);
+    preRestingShort();
+  }
   taskList.forEach(renderTask);
 });

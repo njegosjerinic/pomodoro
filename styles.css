@@ -44,6 +44,12 @@ p{
     background: rgba(82, 4, 4, 0.171);
 }
 
+.progress{
+    background: white;
+    height: 2px;
+    width: 0%                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ;
+}
+
 
 .timer-container{
     display: flex;
@@ -58,11 +64,11 @@ p{
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
-    width: 470px;
-    height: 320px;
-    margin-top: 45px;
+    width: 480px;
+    height: 300px;
+    margin-top: 40px;
     border-radius: 1%;
-    padding-top: 20px;
+    padding-top: 10px;
 }
 
 #countdownDisplay{
@@ -108,9 +114,49 @@ p{
 }
 
 #title{
-    width: 76%;
+    width: 80%;
     border-bottom: 1px solid white;
     margin-bottom:20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+#generalTaskSettings{
+    font-size: large;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    cursor: pointer;
+    width: 30px;
+    margin: 5px;
+    height: fit-content;
+    font-size: x-large;
+    cursor: pointer;
+    border: 0;
+    border-radius: 4px;
+}
+
+.generalTaskSettingsScreen{
+    height: 100px;
+    width: 200px;
+    background: white;
+    position: absolute;
+    right: 0;
+    bottom: -100px;
+    border-radius: 10px;
+    flex-direction: column;
+}
+
+.generalTaskSettingsScreen button{
+    width: 100%;
+    height: 50px;
+    border: 0;
+    background: #f0f0f0;
+    border-radius: 5px;
+    padding:10px;
+    color: gray;
+    cursor: pointer;
 }
 
 #container-for-tasks{
@@ -124,7 +170,7 @@ p{
     display:flex;
     height: 70px;
     background: white;
-    width: 450px;
+    width: 470px;
     margin: 5px;
     padding: 0 5px;
     border-radius: 5px;
@@ -165,7 +211,7 @@ p{
 
 .active{
     border-left: 5px solid black;
-    width: 445px;
+    width: 465px;
 }
 
 #settings{
@@ -338,6 +384,7 @@ input:checked + .slider:before {
 
 .task-settings{
     margin: 20px;
+    border-bottom: 1px solid lightgray;
 }
 
 .auto-breaks{
@@ -382,10 +429,12 @@ input:checked + .slider:before {
     justify-content: space-between;
     align-items: center;
     margin: 20px 0;
+    
 }
 
 .sound-settings{
     margin: 20px;
+    border-bottom: 1px solid lightgray;
 }
 
 .alarm-settings{
@@ -592,6 +641,26 @@ input:checked + .slider:before {
     margin: 20px 0;   
 }
 
+.small-window-container{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.small-window-container button{
+    width: 80px;
+    height: 35px;
+    border: 1px solid lightgray;
+    background: white;
+    border-radius: 8px;
+    padding:10px;
+    color: gray;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .input-button-container{
     padding: 14px 20px;
     text-align: right;
@@ -624,13 +693,25 @@ input:checked + .slider:before {
 }
 
 .state-buttons button{
-    background: transparent;
-    border: 0;
-    color: white;
-    font-size: medium;
-    padding: 5px;
-    border-radius: 2px;
     cursor: pointer;
+    border: none;
+    color: white;
+    height: 40px;
+    margin: 0;
+    padding: 0px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    box-shadow: 0px 6px 0px hsl(358,0%,92%);
+    font-size: 16px;
+    padding: 2px 12px;
+    height: 28px;
+    cursor: pointer;
+    background: none;
+    box-shadow: none;
+    font-weight: 300;
+    color: white;
+    opacity: 1;
+    font-weight: bold;
 }
 
 .state-buttons button:active{
@@ -684,7 +765,7 @@ input:checked + .slider:before {
 
 #addTaskBtn{
     box-sizing: border-box;
-    width: 460px;
+    width: 480px;
     height: 64px;
     background-color: rgba(0,0,0,0.1);
     border-radius: 8px;
@@ -716,7 +797,7 @@ input:checked + .slider:before {
     display: none;
     background: white;
     height: 200px;
-    width: 425px;
+    width: 445px;
     flex-direction: column;
     align-items: flex-start;
     justify-content: space-around;
@@ -970,6 +1051,8 @@ input:checked + .slider:before {
 }
 
 
+
+
 @media screen and (max-width:620px) {
     header{
         width: 90%;
@@ -1005,7 +1088,7 @@ input:checked + .slider:before {
 
     .pomodoro-layout{
     padding: 0px 12px;
-    width: 600px;
+    width: 90%;
     margin: auto;
     display: flex;
     justify-content: center;
@@ -1028,5 +1111,9 @@ input:checked + .slider:before {
 
     #addTaskPanel{
         width: 88%;
+    }
+
+    .estimatedPomodorosContainer{
+        width: 90%;
     }
 }
