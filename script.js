@@ -2,6 +2,7 @@
 const body = document.body;
 const timerBackground = document.querySelector(".timer-background");
 const countdownDisplay = document.getElementById("countdownDisplay");
+const smallCountdownDisplay = document.getElementById("smallCountdownDisplay");
 const title = document.getElementById("title");
 const taskContainer = document.getElementById("container-for-tasks");
 
@@ -104,12 +105,10 @@ let acumulatedPomodorosDone = 0;
 function formatTime(seconds) {
   const minutes = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  const w = window.innerWidth;
-  if(w <= 200){
-    return `${minutes}`
-  }else{
-    return `${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
-  }
+
+  smallCountdownDisplay.innerText = `${minutes < 10 ? "0" : ""}${minutes}`;
+
+  return `${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
 }
 
 //Gets input and transforms it into seconds
@@ -1214,9 +1213,9 @@ clearAllTasks.addEventListener("click", function () {
   updatePomodoroSummary();
 });
 
-smallWindowOpenBtn.addEventListener("click", function () {
-  window.open("index.html", "Pomodoro Timer", "width=200,height=1000,scrollbars=no,resizable=no");
-}); 
+
+
+
 
 window.addEventListener("DOMContentLoaded", () => {
   pomodorosCounter.innerText = pomodosCounter;

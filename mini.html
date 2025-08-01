@@ -222,30 +222,17 @@
     </div>
     <script src="script.js"></script>
     <script>
-        let miniWindow = null;
-
-        function openMini() {
-            miniWindow = window.open("mini.html", "Mini", "width=200,height=1000");
+        function receiveUpdateFromMain(state) {
+            console.log("Mini received:", state);
+            // Update UI accordingly
         }
 
-        // Called by mini window
-        function receiveUpdateFromMini(data) {
-            console.log("Got data from mini:", data);
+            // You can also send data back
+        function sendToMain() {
+            if (window.opener && !window.opener.closed) {
+            window.opener.receiveUpdateFromMini({ action: "pause" });
         }
-
-        // Send to mini
-        function sendUpdateToMini(state) {
-            if (miniWindow && !miniWindow.closed) {
-                miniWindow.receiveUpdateFromMain(state);
-            }
-        }
-
-        smallWindowOpenBtn.addEventListener("click", openMini ,sendUpdateToMini({
-            pomodorosCounter: document.getElementById("pomodorosCounter").innerText,
-            currentProject: document.getElementById("currentProject").innerText,
-            countdownDisplay: document.getElementById("countdownDisplay").innerText
-        }));
-
+    }
 
     </script>
 </body>
