@@ -6,7 +6,6 @@ const smallCountdownDisplay = document.getElementById("smallCountdownDisplay");
 const title = document.getElementById("title");
 const taskContainer = document.getElementById("container-for-tasks");
 
-const longBreakInput = document.getElementById("longBreakTimeInput");
 const amountOfPomodorosInput = document.getElementById("amountOfPomodorosInput");
 const tasks = document.querySelectorAll(".task");
 const pomodorosCounter = document.getElementById("pomodorosCounter");
@@ -22,13 +21,17 @@ const progressToCompletion = document.querySelector(".progress");
 //  Inputs
 const taskInput = document.getElementById("taskInput");
 const timeInput = document.getElementById("timeInput");
+window.timeInput = timeInput;
 const timeRestInput = document.getElementById("timeRestInput");
+window.timeRestInput = timeRestInput;
 const timeLongRestInput = document.getElementById("longBreakTimeInput");
+window.timeLongRestInput = timeLongRestInput;
 const longBrakeIntervalInput = document.getElementById("longBreakIntervalInput");
 const repeatAlarmInput = document.getElementById("repeatAlarmInput");
 
 // Buttons
 const timeBtnStart = document.getElementById("timeBtnStart");
+
 const timeBtnPause = document.getElementById("timeBtnPause");
 const timeBtnFF = document.getElementById("timeBtnFF");
 const addTaskBtn = document.getElementById("addTaskBtn");
@@ -387,9 +390,8 @@ countdownDisplay.value = updateTimer(parseInt(timeInput.value * 60));
 
 //Spliting the timer function into workTimer(), restTimer() and longRestTimer()
 
-function startWorkTimer(duration, restDuration, longRestDuration){
+window.startWorkTimer = function(duration, restDuration, longRestDuration){
   timeBtnPause.innerText = "PAUSE";
-  timeBtnPause.style.boxShadow = "0px 0px 0px";
   updateTimer(duration);
     countdown = setInterval(function () {
       if (!isPaused) {
@@ -410,11 +412,11 @@ function startWorkTimer(duration, restDuration, longRestDuration){
         if(updateRestInterval()){
           preRestingLong();
           updateTimer(longRestDuration);
-          startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
+          startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
         }else{
           preRestingShort();
           updateTimer(restDuration);
-          startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value))
+          startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value))
         }
         progressToCompletion.style.width = "0%";
       }else if(duration == 0){
@@ -434,6 +436,8 @@ function startWorkTimer(duration, restDuration, longRestDuration){
     
 }
 
+window.startRestTimer = startRestTimer;
+
 function startRestTimer(duration, restDuration, longRestDuration){
   restCountdown = setInterval(function () {
         if (!isPaused) {
@@ -451,7 +455,7 @@ function startRestTimer(duration, restDuration, longRestDuration){
           isWorking = true;
           preWorking();
           updateTimer(duration);
-          startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
+          startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
           updatePomodorosCounter();
           shortBrakeModeBtn.style.backgroundColor = "transparent";
           workModeBtn.style.backgroundColor = "transparent";
@@ -468,13 +472,15 @@ function startRestTimer(duration, restDuration, longRestDuration){
       }, 1000);
 }
 
+window.startLongRestTimer = startLongRestTimer
+
 function startLongRestTimer(duration, restDuration, longRestDuration){
   longRestCountdown = setInterval(function () {
         if (!isPaused) {
           longRestDuration--;
           restingLong();
           updateTimer(longRestDuration);
-          progressBarUpdate(longRestDuration,getInput(longBreakInput.value));
+          progressBarUpdate(longRestDuration,getInput(timeLongRestInput.value));
           localStorage.setItem("longRestCountdown", longRestDuration);
           localStorage.setItem("isWorking", isWorking);
         }
@@ -910,11 +916,28 @@ function progressBarUpdate(remeaningTime, totalTime){
   const percent = 100 - ((remeaningTime / totalTime) * 100);
   progressToCompletion.style.width = `${percent}%`;
 }
+
+function clickStartButton(){
+  timeBtnStart.style.boxShadow = "0px 0px 0px";
+}
+
+window.startMainTimer = function () {
+  timeBtnStart.click();
+};
+
 //================================================================EVENT LISTENERS============================================================//
+let miniWindow = null;
+
+function openMini() {
+  miniWindow = window.open("mini.html", "Mini", "width=200,height=1000");
+}
+
+smallWindowOpenBtn.addEventListener("click", openMini)
+
+
 settings.addEventListener("click", function () {
   settingsScreen.style.display = "block";
   overlay.style.display = "flex";
-    console.log(getInput(timeInput.value));
 });
 
 exitSettingsButton.addEventListener("click", function () {
@@ -1007,20 +1030,59 @@ inputBtn.addEventListener("click", function () {
 
 //  Starting the timer
 timeBtnStart.addEventListener("click", function () {
+  timeBtnStart.disabled = true;
   if (isWorking) {
     updatePomodorosCounter();
-    startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
+    startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
+    updatePomodorosCounterPerTask();
+    if(miniWindow){
+      miniWindow.startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
+    }
   }else if(updateRestInterval() || isRestingLong){
-    startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
+    startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
     taskCompletionCheck();
     updatePomodorosCounterPerTask();
+    if(miniWindow){
+      miniWindow.startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
+    }
   }else{
-    startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(longBreakInput.value));
+    startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
     taskCompletionCheck();
     updatePomodorosCounterPerTask();
+    if(miniWindow){
+      miniWindow.startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
+    }
   }
   startingCLick.play();
 });
+if(miniWindow){
+document.getElementById("timeBtnStartMini").addEventListener("click", function(){
+    timeBtnStart.disabled = true;
+  if (isWorking) {
+    updatePomodorosCounter();
+    startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
+    updatePomodorosCounterPerTask();
+    if(miniWindow){
+      miniWindow.startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
+    }
+  }else if(updateRestInterval() || isRestingLong){
+    startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
+    taskCompletionCheck();
+    updatePomodorosCounterPerTask();
+    if(miniWindow){
+      miniWindow.startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
+    }
+  }else{
+    startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
+    taskCompletionCheck();
+    updatePomodorosCounterPerTask();
+    if(miniWindow){
+      miniWindow.startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
+    }
+  }
+  startingCLick.play();
+})
+}
 
 //  Actions that the Fast Foward button does
 timeBtnFF.addEventListener("click", function () {
@@ -1070,7 +1132,8 @@ timeBtnFF.addEventListener("click", function () {
       shortBrakeModeBtn.style.backgroundColor = "transparent";
     }
   }
-
+  timeBtnStart.disabled = false;
+  timeBtnStart.style.boxShadow = "rgb(235, 235, 235) 0px 6px 0px";
   saveTasks();
 });
 
@@ -1081,24 +1144,43 @@ timeBtnPause.addEventListener("click", function () {
   if(isWorking){
   if (isPaused) {
     resumeCountdownWork();
+    if(miniWindow){
+      miniWindow.resumeCountdownWork();
+      miniWindow.console.log("works")
+    }
     startingCLick.play();
   } else {
     pauseCountdownWork();
+    if(miniWindow){
+      miniWindow.pauseCountdownWork();
+    }
   }
   }else{
     if(updateRestInterval()){
       if (isPaused) {
         resumeCountdownRestingLong();
         startingCLick.play();
+        if(miniWindow){
+          miniWindow.resumeCountdownRestingLong();
+        }
       } else {
         pauseCountdownRestingLong();
+        if(miniWindow){
+          miniWindow.pauseCountdownRestingLong();
+        }
       }
     }else{
       if (isPaused) {
         resumeCountdownRestingShort();
         startingCLick.play();
+        if(miniWindow){
+          miniWindow.resumeCountdownRestingShort();
+        }
       } else {
         pauseCountdownRestingShort();
+        if(miniWindow){
+          miniWindow.pauseCountdownRestingShort();
+        }
       }
     }
   }
@@ -1165,12 +1247,12 @@ longBrakeModeBtn.addEventListener('click', function(){
   workModeBtn.style.backgroundColor = "transparent";
   if(isWorking){
     clearInterval(countdown)
-    updateTimer(getInput(longBreakInput.value))
+    updateTimer(getInput(timeLongRestInput.value))
     preRestingLong();
   }else if(!isWorking){
     clearInterval(restCountdown);
     clearInterval(longRestCountdown);
-    updateTimer(getInput(longBreakInput.value))
+    updateTimer(getInput(timeLongRestInput.value))
     preRestingLong();
   }
 });
@@ -1296,7 +1378,7 @@ if (isWorking && localStorage.getItem("workingColor")) {
   isRestingLong = updateRestInterval();
   if (isWorking && durationCountdown < initialTime) {
     updateTimer(durationCountdown);
-    startWorkTimer(durationCountdown, getInput(timeRestInput.value), getInput(longBreakInput.value));
+    startWorkTimer(durationCountdown, getInput(timeRestInput.value), getInput(timeLongRestInput.value));
     working();
   }else if(!isWorking && isRestingLong && longRestDurationCountdown < getInput(timeLongRestInput.value)){
     updateTimer(longRestDurationCountdown);
@@ -1304,7 +1386,7 @@ if (isWorking && localStorage.getItem("workingColor")) {
     restingLong();
   }else if(!isWorking && !isRestingLong && restDurationCountdown < getInput(timeRestInput.value)){
     updateTimer(restDurationCountdown);
-    startRestTimer(getInput(timeInput.value), restDurationCountdown, getInput(longBreakInput.value));
+    startRestTimer(getInput(timeInput.value), restDurationCountdown, getInput(timeLongRestInput.value));
     restingShort();
   }else if(isWorking && durationCountdown){
     updateTimer(initialTime);

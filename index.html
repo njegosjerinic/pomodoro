@@ -178,7 +178,7 @@
                 <div id="countdownDisplay">00:00</div>
                 <div id="smallCountdownDisplay">00</div>
                 <div class="controllTime">
-                    <button id="timeBtnStart">START</button>
+                    <button id="timeBtnStart" onclick="clickStartButton();">START</button>
                     <button id="timeBtnPause">PAUSE</button>
                     <button id="timeBtnFF">>|</button>
                 </div>
@@ -222,31 +222,7 @@
     </div>
     <script src="script.js"></script>
     <script>
-        let miniWindow = null;
-
-        function openMini() {
-            miniWindow = window.open("mini.html", "Mini", "width=200,height=1000");
-        }
-
-        // Called by mini window
-        function receiveUpdateFromMini(data) {
-            console.log("Got data from mini:", data);
-        }
-
-        // Send to mini
-        function sendUpdateToMini(state) {
-            if (miniWindow && !miniWindow.closed) {
-                miniWindow.receiveUpdateFromMain(state);
-            }
-        }
-
-        smallWindowOpenBtn.addEventListener("click", openMini ,sendUpdateToMini({
-            pomodorosCounter: document.getElementById("pomodorosCounter").innerText,
-            currentProject: document.getElementById("currentProject").innerText,
-            countdownDisplay: document.getElementById("countdownDisplay").innerText
-        }));
-
-
+        
     </script>
 </body>
 

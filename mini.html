@@ -178,7 +178,8 @@
                 <div id="countdownDisplay">00:00</div>
                 <div id="smallCountdownDisplay">00</div>
                 <div class="controllTime">
-                    <button id="timeBtnStart">START</button>
+                    <button id="timeBtnStartMini">START</button>
+                    <button id="timeBtnStart"></button>
                     <button id="timeBtnPause">PAUSE</button>
                     <button id="timeBtnFF">>|</button>
                 </div>
@@ -222,18 +223,52 @@
     </div>
     <script src="script.js"></script>
     <script>
-        function receiveUpdateFromMain(state) {
-            console.log("Mini received:", state);
-            // Update UI accordingly
-        }
 
-            // You can also send data back
-        function sendToMain() {
+        
+
+        document.getElementById("timeBtnStartMini").addEventListener("click", () => {
             if (window.opener && !window.opener.closed) {
-            window.opener.receiveUpdateFromMini({ action: "pause" });
-        }
-    }
+                const work = window.opener.getInput(window.opener.timeInput.value);
+                const short = window.opener.getInput(window.opener.timeRestInput.value);
+                const long = window.opener.getInput(window.opener.timeLongRestInput.value);
 
+                // Start the timer from the main window
+                window.opener.startMainTimer();
+
+                // Optionally also start it in mini
+                startWorkTimer(work, short, long);
+            } else {
+                alert("Main window is not available.");
+            }
+        });
+
+document.getElementById("timeBtnPause").addEventListener("click", function(){
+    if(window.opener)
+        if(isWorking){
+            if (isPaused) {
+                window.opener.resumeCountdownWork();
+                startingCLick.play();
+            } else {
+                window.opener.pauseCountdownWork();
+            }
+        }else{
+            if(updateRestInterval()){
+                if (isPaused) {
+                    window.opener.resumeCountdownRestingLong();
+                    startingCLick.play();
+                } else {
+                    window.opener.pauseCountdownRestingLong();
+                }
+            }else{
+                if (isPaused) {
+                    window.opener.resumeCountdownRestingShort();
+                    startingCLick.play();
+                } else {
+                    window.opener.pauseCountdownRestingShort();
+                }
+            }
+    }
+})
     </script>
 </body>
 
