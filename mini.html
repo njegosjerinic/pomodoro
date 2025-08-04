@@ -178,8 +178,7 @@
                 <div id="countdownDisplay">00:00</div>
                 <div id="smallCountdownDisplay">00</div>
                 <div class="controllTime">
-                    <button id="timeBtnStartMini">START</button>
-                    <button id="timeBtnStart"></button>
+                    <button id="timeBtnStart">START</button>
                     <button id="timeBtnPause">PAUSE</button>
                     <button id="timeBtnFF">>|</button>
                 </div>
@@ -224,51 +223,44 @@
     <script src="script.js"></script>
     <script>
 
-        
+        const timerDisplay = document.getElementById("countdownDisplay")
+        const smallTimerDisplay = document.getElementById("smallCountdownDisplay");
+        const timeBtnStartMini = document.getElementById("timeBtnStartMini");
+        const timeBtnFastFoward = document.getElementById("timeBtnFF");
 
-        document.getElementById("timeBtnStartMini").addEventListener("click", () => {
+
+        window.addEventListener("message", (event)=>{
+            if(event.data.type === "TIMER"){
+                timerDisplay.innerText = event.data.duration;
+            }
+        })
+
+        window.addEventListener("message",(event)=>{
+            if(event.data.type === "SMALL_TIMER"){
+                smallTimerDisplay.innerText = event.data.duration;
+            }
+        })
+
+        timeBtnStart.addEventListener("click", () => {
             if (window.opener && !window.opener.closed) {
-                const work = window.opener.getInput(window.opener.timeInput.value);
-                const short = window.opener.getInput(window.opener.timeRestInput.value);
-                const long = window.opener.getInput(window.opener.timeLongRestInput.value);
+                window.opener.postMessage({type: "START_TIMER"}, "*");
+            }
+            window.opener.startingCLick.play();
+        });
 
-                // Start the timer from the main window
-                window.opener.startMainTimer();
-
-                // Optionally also start it in mini
-                startWorkTimer(work, short, long);
-            } else {
-                alert("Main window is not available.");
+        document.getElementById("timeBtnPause").addEventListener("click", function () {
+            if (window.opener) {
+                window.opener.postMessage({ type: "TOGGLE_TIMER" }, "*");
+                startingCLick.play();
             }
         });
 
-document.getElementById("timeBtnPause").addEventListener("click", function(){
-    if(window.opener)
-        if(isWorking){
-            if (isPaused) {
-                window.opener.resumeCountdownWork();
-                startingCLick.play();
-            } else {
-                window.opener.pauseCountdownWork();
+
+        timeBtnFastFoward.addEventListener("click", ()=>{
+            if(window.opener && !window.opener.closed){
+                window.opener.postMessage({type : "FAST_FOWARD"});
             }
-        }else{
-            if(updateRestInterval()){
-                if (isPaused) {
-                    window.opener.resumeCountdownRestingLong();
-                    startingCLick.play();
-                } else {
-                    window.opener.pauseCountdownRestingLong();
-                }
-            }else{
-                if (isPaused) {
-                    window.opener.resumeCountdownRestingShort();
-                    startingCLick.play();
-                } else {
-                    window.opener.pauseCountdownRestingShort();
-                }
-            }
-    }
-})
+        })
     </script>
 </body>
 

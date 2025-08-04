@@ -111,6 +111,9 @@ function formatTime(seconds) {
 
   smallCountdownDisplay.innerText = `${minutes < 10 ? "0" : ""}${minutes}`;
 
+  if(miniWindow){
+    miniWindow.postMessage({ type : "SMALL_TIMER", duration : minutes});
+  }
   return `${minutes < 10 ? "0" : ""}${minutes}:${secs < 10 ? "0" : ""}${secs}`;
 }
 
@@ -386,7 +389,7 @@ function updateRestInterval(){
 
 
 //Begining value that is shown on the screen Its below the localStorage because it uses it
-countdownDisplay.value = updateTimer(parseInt(timeInput.value * 60));
+
 
 //Spliting the timer function into workTimer(), restTimer() and longRestTimer()
 
@@ -413,10 +416,19 @@ window.startWorkTimer = function(duration, restDuration, longRestDuration){
           preRestingLong();
           updateTimer(longRestDuration);
           startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
+          if(miniWindow){
+            miniWindow.preRestingLong();
+          }
+
+          timeBtnStart.disabled = false;
         }else{
           preRestingShort();
           updateTimer(restDuration);
           startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value))
+          if(miniWindow){
+            miniWindow.preRestingShort();
+          }
+          timeBtnStart.disabled = false;
         }
         progressToCompletion.style.width = "0%";
       }else if(duration == 0){
@@ -426,9 +438,17 @@ window.startWorkTimer = function(duration, restDuration, longRestDuration){
         if(updateRestInterval()){
           preRestingLong();
           updateTimer(longRestDuration);
+          if(miniWindow){
+            miniWindow.preRestingLong();
+          }
+          timeBtnStart.disabled = false;
         }else{
           preRestingShort();
           updateTimer(restDuration);
+          if(miniWindow){
+            miniWindow.preRestingShort();
+          }
+          timeBtnStart.disabled = false;
         }
         progressToCompletion.style.width = "0%";
       }
@@ -455,19 +475,27 @@ function startRestTimer(duration, restDuration, longRestDuration){
           isWorking = true;
           preWorking();
           updateTimer(duration);
+          if(miniWindow){
+            miniWindow.preWorking();
+          }
           startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
           updatePomodorosCounter();
           shortBrakeModeBtn.style.backgroundColor = "transparent";
           workModeBtn.style.backgroundColor = "transparent";
           progressToCompletion.style.width = "0%";
+          timeBtnStart.disabled = false;
         }else if(restDuration == 0){
           alarmSoundSelector();
           clearInterval(restCountdown);
           isWorking = true;
           preWorking();
           updateTimer(duration);
+          if(miniWindow){
+            miniWindow.preWorking();
+          }
           progressToCompletion.style.width = "0%";
           shortBrakeModeBtn.style.backgroundColor = "transparent";
+          timeBtnStart.disabled = false;
         }
       }, 1000);
 }
@@ -480,6 +508,9 @@ function startLongRestTimer(duration, restDuration, longRestDuration){
           longRestDuration--;
           restingLong();
           updateTimer(longRestDuration);
+          if(miniWindow){
+            miniWindow.restingLong();
+          }
           progressBarUpdate(longRestDuration,getInput(timeLongRestInput.value));
           localStorage.setItem("longRestCountdown", longRestDuration);
           localStorage.setItem("isWorking", isWorking);
@@ -491,15 +522,22 @@ function startLongRestTimer(duration, restDuration, longRestDuration){
           isWorking = true;
           preWorking();
           updateTimer(duration);
+          if(miniWindow){
+            miniWindow.preWorking();
+          }
           progressToCompletion.style.width = "0%";
           longBrakeModeBtn.style.backgroundColor = "transparent";
           shortBrakeModeBtn.style.backgroundColor = "transparent";  
+          timeBtnStart.disabled = false;
         }
       }, 1000);
 }
 
 function updateTimer(time) {
   countdownDisplay.innerText = formatTime(time);
+  if(miniWindow && !miniWindow.closed){
+      miniWindow.postMessage({type: "TIMER", duration : formatTime(time)});
+  }
 }
 
 function updatePomodorosCounter() {
@@ -1031,58 +1069,43 @@ inputBtn.addEventListener("click", function () {
 //  Starting the timer
 timeBtnStart.addEventListener("click", function () {
   timeBtnStart.disabled = true;
+  if(miniWindow){
+    miniWindow.timeBtnStartMini.style.display = "none";
+  }
   if (isWorking) {
     updatePomodorosCounter();
     startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
     updatePomodorosCounterPerTask();
-    if(miniWindow){
-      miniWindow.startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
-    }
   }else if(updateRestInterval() || isRestingLong){
     startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
     taskCompletionCheck();
     updatePomodorosCounterPerTask();
-    if(miniWindow){
-      miniWindow.startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
-    }
   }else{
     startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
     taskCompletionCheck();
     updatePomodorosCounterPerTask();
-    if(miniWindow){
-      miniWindow.startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
-    }
   }
   startingCLick.play();
 });
-if(miniWindow){
-document.getElementById("timeBtnStartMini").addEventListener("click", function(){
+
+window.addEventListener("message", (event)=>{
+  if(event.data?.type === "START_TIMER"){
     timeBtnStart.disabled = true;
   if (isWorking) {
     updatePomodorosCounter();
     startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
     updatePomodorosCounterPerTask();
-    if(miniWindow){
-      miniWindow.startWorkTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
-    }
   }else if(updateRestInterval() || isRestingLong){
     startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
     taskCompletionCheck();
     updatePomodorosCounterPerTask();
-    if(miniWindow){
-      miniWindow.startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
-    }
   }else{
     startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
     taskCompletionCheck();
     updatePomodorosCounterPerTask();
-    if(miniWindow){
-      miniWindow.startRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), getInput(timeLongRestInput.value));
-    }
   }
-  startingCLick.play();
+  }
 })
-}
 
 //  Actions that the Fast Foward button does
 timeBtnFF.addEventListener("click", function () {
@@ -1105,10 +1128,18 @@ timeBtnFF.addEventListener("click", function () {
       localStorage.setItem("longRestCountdown", longRestDuration);
       preRestingLong();
       workModeBtn.style.backgroundColor = "transparent";
+      if(miniWindow){
+        miniWindow.preRestingLong();
+        miniWindow.timeBtnStartMini.style.display = "block"
+      }
     } else {
       updateTimer(restDuration);
       localStorage.setItem("restCountdown", restDuration);
       preRestingShort();
+      if(miniWindow){
+        miniWindow.preRestingShort();
+        miniWindow.timeBtnStartMini.style.display = "block"
+      }
     }
 
   } else {
@@ -1122,6 +1153,10 @@ timeBtnFF.addEventListener("click", function () {
       localStorage.setItem("isWorking", isWorking);
       localStorage.setItem("isRestingLong", isRestingLong);
       longBrakeModeBtn.style.backgroundColor = "transparent";
+      if(miniWindow){
+        miniWindow.preWorking();
+        miniWindow.timeBtnStartMini.style.display = "block"
+      }
     } else {
       clearInterval(restCountdown);
       updateTimer(duration);
@@ -1130,12 +1165,70 @@ timeBtnFF.addEventListener("click", function () {
       isWorking = true;
       localStorage.setItem("isWorking", isWorking);
       shortBrakeModeBtn.style.backgroundColor = "transparent";
+      if(miniWindow){
+        miniWindow.preWorking();
+        miniWindow.timeBtnStartMini.style.display = "block"
+      }
     }
   }
   timeBtnStart.disabled = false;
   timeBtnStart.style.boxShadow = "rgb(235, 235, 235) 0px 6px 0px";
   saveTasks();
 });
+
+window.addEventListener("message", (event)=>{
+  if(event.data.type === "FAST_FOWARD"){
+      const duration = getInput(timeInput.value);
+      const restDuration = getInput(timeRestInput.value);
+      const longRestDuration = getInput(timeLongRestInput.value);
+
+      progressToCompletion.style.width = "0%";
+
+      isRestingLong = updateRestInterval(); // Always update this dynamically
+
+      if (isWorking) {
+        clearInterval(countdown);
+        localStorage.setItem("countdown", duration);
+        isWorking = false;
+        localStorage.setItem("isWorking", isWorking);
+
+        if (isRestingLong) {
+          updateTimer(longRestDuration);
+          localStorage.setItem("longRestCountdown", longRestDuration);
+          preRestingLong();
+          workModeBtn.style.backgroundColor = "transparent";
+        } else {
+          updateTimer(restDuration);
+          localStorage.setItem("restCountdown", restDuration);
+          preRestingShort();
+        }
+
+      } else {
+        if (isRestingLong) {
+          clearInterval(longRestCountdown);
+          updateTimer(duration);
+          localStorage.setItem("countdown", duration);
+          preWorking();
+          isWorking = true;
+          isRestingLong = false;
+          localStorage.setItem("isWorking", isWorking);
+          localStorage.setItem("isRestingLong", isRestingLong);
+          longBrakeModeBtn.style.backgroundColor = "transparent";
+        } else {
+          clearInterval(restCountdown);
+          updateTimer(duration);
+          localStorage.setItem("countdown", duration);
+          preWorking();
+          isWorking = true;
+          localStorage.setItem("isWorking", isWorking);
+          shortBrakeModeBtn.style.backgroundColor = "transparent";
+        }
+      }
+      timeBtnStart.disabled = false;
+      timeBtnStart.style.boxShadow = "rgb(235, 235, 235) 0px 6px 0px";
+      saveTasks();
+  }
+})
 
 
 //  Code for pausing
@@ -1185,6 +1278,35 @@ timeBtnPause.addEventListener("click", function () {
     }
   }
 });
+
+window.addEventListener("message", (event) => {
+    if (event.data?.type === "TOGGLE_TIMER") {
+        if (isWorking) {
+            if (isPaused) {
+                resumeCountdownWork();
+            } else {
+                pauseCountdownWork();
+            }
+        } else {
+            if (updateRestInterval()) {
+                if (isPaused) {
+                    resumeCountdownRestingLong();
+                } else {
+                    pauseCountdownRestingLong();
+                }
+            } else {
+                if (isPaused) {
+                    resumeCountdownRestingShort();
+                } else {
+                    pauseCountdownRestingShort();
+                }
+            }
+        }
+    }
+});
+
+
+
 
 addTaskBtn.addEventListener("click", function (event) {
   event.stopPropagation();
