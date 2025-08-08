@@ -96,12 +96,13 @@ let isPaused = false;
 let isWorking = true;
 let isRestingLong = false;
 let numberOfTasks = 0;
-let pomodosCounter = parseInt(sessionStorage.getItem("allPomodorosCounter")) || 1;
+let pomodosCounter = parseInt(sessionStorage.getItem("allPomodorosCounter")) || 0;
 let taskList = JSON.parse(localStorage.getItem("tasks")) || [];
 let baseWorkingTimer = 30;
 let colorSelectorMode = null;
 let acumulatedPomodoros = 0;
 let acumulatedPomodorosDone = 0;
+let overrideState = null;
 
 //==============UTILITIES==================//
 //This takes input that has been translated to seconds and translates it back to minutes and seconds
@@ -175,12 +176,12 @@ function showWorkDarkModeUI() {
 function preRestingShort() {
   isWorking = false;
   timeBtnStart.style.display = "block";
-  timeBtnStart.style.color = localStorage.getItem("shortBrakeColor") || "rgba(55, 141, 55, 1)";
+  timeBtnStart.style.color = localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
   timeBtnFF.style.display = "none";
   timeBtnPause.style.display = "none";
-  body.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "green";
+  body.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
   taskContainer.style.display = "block";
-  shortBrakeModeBtn.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "rgba(55, 141, 55, 1)";
+  shortBrakeModeBtn.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
   workModeBtn.style.backgroundColor = "transparent";
   estimatedPomodorosContainer.style.display = "flex";
   addTaskBtn.style.display = "block";
@@ -189,28 +190,28 @@ function preRestingShort() {
   longBrakeModeBtn.style.display = "block";
   timerBackground.style.background = "rgba(255, 255, 255, 0.1)";
   timeBtnPause.style.background = "white";
-  timeBtnPause.style.color = localStorage.getItem("shortBrakeColor") || "rgba(55, 141, 55, 1)";
+  timeBtnPause.style.color = localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
 }
 
 function restingShort() {
   isWorking = false;
-  body.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "green";
+  body.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
   timeBtnStart.style.display = "none";
-  timeBtnStart.style.color = localStorage.getItem("shortBrakeColor") || "rgba(55, 141, 55, 1)";
+  timeBtnStart.style.color = localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
   timeBtnFF.style.display = "block";
   timeBtnPause.style.display = "block";
   taskContainer.style.display = "block";
-  shortBrakeColor.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "rgba(40, 104, 40, 1)";
+  shortBrakeColor.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
   workModeBtn.style.backgroundColor = "transparent";
   estimatedPomodorosContainer.style.display = "flex";
   addTaskBtn.style.display = "block";
   workModeBtn.style.display = "block";
   shortBrakeModeBtn.style.display = "block";
-  shortBrakeModeBtn.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "rgba(55, 141, 55, 1)";
+  shortBrakeModeBtn.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
   longBrakeModeBtn.style.display = "block";
   timerBackground.style.background = "rgba(255, 255, 255, 0.1)";
   timeBtnPause.style.background = "white";
-  timeBtnPause.style.color = localStorage.getItem("shortBrakeColor") || "rgba(55, 141, 55, 1)";
+  timeBtnPause.style.color = localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
 }
 
 function preRestingLong(){
@@ -380,15 +381,17 @@ function resumeCountdownRestingLong() {
 }
 
 function updateRestInterval(){
+
+  if(overrideState !== null){
+    return false
+  }
+
   if(pomodosCounter % longBrakeIntervalInput.value != 0){
     return false
   }else{
     return true
   }
 }
-
-
-//Begining value that is shown on the screen Its below the localStorage because it uses it
 
 
 //Spliting the timer function into workTimer(), restTimer() and longRestTimer()
@@ -475,6 +478,7 @@ function startRestTimer(duration, restDuration, longRestDuration){
           isWorking = true;
           preWorking();
           updateTimer(duration);
+          overrideState = null;
           if(miniWindow){
             miniWindow.preWorking();
           }
@@ -542,6 +546,10 @@ function updateTimer(time) {
 
 function updatePomodorosCounter() {
   pomodosCounter++;
+  acumulatedPomodorosDone++;
+  acumulatedPomodorosDoneView.innerText = acumulatedPomodorosDone;
+  localStorage.setItem("acumulatedPomodorosDone", acumulatedPomodorosDone);
+  localStorage.setItem("acumulatedPomodorosDone", acumulatedPomodorosDone);
   sessionStorage.setItem("allPomodorosCounter", pomodosCounter);
   pomodorosCounter.innerText = pomodosCounter;
   taskList.forEach((task) => {
@@ -589,8 +597,6 @@ function renderTask(task) {
 
   const taskTime = document.createElement("p");
   taskTime.innerText = `${donePomodoros} / ${pomodorosToDo}`;
-  acumulatedPomodorosDoneView.innerText = acumulatedPomodorosDone + donePomodoros;
-  localStorage.setItem("acumulatedPomodorosDone", acumulatedPomodorosDone);
 
 
   if (isActive) {
@@ -624,9 +630,19 @@ function renderTask(task) {
 
   settingsTaskInput.style.display = "none";
 
+  const actEstPomodoros = createElement("div");
+  actEstPomodoros.innerText = "Act / Est Pomodoros";
+  actEstPomodoros.style.color = "black";
+    actEstPomodoros.style.fontWeight = "600";
+
   const settingsPomodorosInput = createElement("input");
   settingsPomodorosInput.value = task.pomodorosToDo;
   settingsPomodorosInput.type = "number";
+  settingsPomodorosInput.style.border = "none";
+  settingsPomodorosInput.style.background = "#efefef";
+  settingsPomodorosInput.style.width = "50px";
+  settingsPomodorosInput.style.height = "35px";
+  settingsPomodorosInput.style.borderRadius = "5px";
 
   const pomodoroCounterForTaskModificationDiv = createElement("p");
   pomodoroCounterForTaskModificationDiv.innerText = donePomodoros;
@@ -634,14 +650,14 @@ function renderTask(task) {
   const modifyingPomodorosToDoContainer = createElement("div");
   modifyingPomodorosToDoContainer.className = "modifying-pomodoros-container";
 
-  modifyingPomodorosToDoContainer.append(settingsPomodorosInput,pomodoroCounterForTaskModificationDiv);
+  modifyingPomodorosToDoContainer.append(pomodoroCounterForTaskModificationDiv,"/",settingsPomodorosInput);
 
-  taskModInputPanel.append(settingsTaskInput,modifyingPomodorosToDoContainer);
+  taskModInputPanel.append(settingsTaskInput,actEstPomodoros,modifyingPomodorosToDoContainer);
   taskModInputPanel.style.height = "60%";
   taskModInputPanel.style.display = "flex";
   taskModInputPanel.style.flexDirection = "column";
   taskModInputPanel.style.alignItems = "flex-start";
-  taskModInputPanel.style.gap = "50px"
+  taskModInputPanel.style.gap = "30px"
   taskModInputPanel.style.padding = "20px";
 
   const buttonsForManipulationDiv = document.createElement("div");
@@ -659,15 +675,21 @@ function renderTask(task) {
   saveTaskEditBtn.className = "task-mod-buttons-save";
 
   saveTaskEditBtn.addEventListener("click", function(e){
+    // For counter
+    acumulatedPomodoros = parseInt(acumulatedPomodoros) - task.pomodorosToDo;
+    acumulatedPomodoros = parseInt(acumulatedPomodoros) + parseInt(settingsPomodorosInput.value);
+    acumulatedPomodorosView.innerText =  acumulatedPomodoros;
+    localStorage.setItem("acumulatedPomodoros", acumulatedPomodoros);
+
+
+    // For task
     e.stopPropagation();
     taskDesc.innerText = settingsTaskInput.value;
     task.name = settingsTaskInput.value;
     task.pomodorosToDo = parseInt(settingsPomodorosInput.value, 10);
     pomodoroCounterForTaskModificationDiv.innerText = task.donePomodoros;
     settingsPomodorosInput.value = task.pomodorosToDo;
-    taskTime.innerText = `${task.donePomodoros} / ${task.pomodorosToDo}`;;
-    acumulatedPomodorosView.innerText =  acumulatedPomodoros + settingsPomodorosInput.value;
-    localStorage.setItem("acumulatedPomodoros", acumulatedPomodoros);
+    taskTime.innerText = `${task.donePomodoros} / ${task.pomodorosToDo}`;
     taskDiv.style.height = "70px";
     taskDiv.style.flexDirection = "row";
     taskDonenes.style.display = "flex";
@@ -677,7 +699,6 @@ function renderTask(task) {
     taskModPanel.style.display = "none";
     taskDonenesAndName.style.display = "flex";
     localStorage.setItem("tasks", JSON.stringify(taskList));
-    updatePomodoroSummary();
   });
 
   saveAndCancelDiv.append(cancelTaskEditBtn,saveTaskEditBtn);
@@ -699,7 +720,6 @@ function renderTask(task) {
   taskSettingsButton.addEventListener("click", (e) => {
     e.stopPropagation();
     taskDiv.style.height = "282px";
-    taskDiv.style.width = "480px";
     taskDonenes.style.display = "none";
     settingsTaskInput.style.display = "block";
     taskDesc.style.display = "none"
@@ -708,7 +728,7 @@ function renderTask(task) {
     taskDiv.style.flexDirection = "column";
     taskDonenesAndName.style.display = "none";
     taskModPanel.style.display = "flex";
-    taskDiv.style.padding = "0";
+    taskDiv.style.padding = "0 5px";
     settingsTaskInput.focus();
     settingsTaskInput.setSelectionRange(settingsTaskInput.value.length, settingsTaskInput.value.length);
     settingsTaskInput.style.outline = "none";
@@ -736,12 +756,8 @@ function renderTask(task) {
     taskContainer.removeChild(taskDiv);
     taskList = taskList.filter(t => t.id !== id);
     saveTasks();
-    if(acumulatedPomodoros >= 0){
     acumulatedPomodoros -= pomodorosToDo;
-    }else{
-      acumulatedPomodoros = 1;
-    }
-    updatePomodoroSummary();
+    localStorage.setItem("acumulatedPomodoros" , acumulatedPomodoros)
   })
 
   taskDiv.addEventListener("click", () => {
@@ -785,7 +801,6 @@ function renderTask(task) {
   taskDiv.append(taskDonenesAndName, taskContent, taskModPanel);
 
   taskContainer.appendChild(taskDiv);
-  updatePomodoroSummary();
 }
 
 function addTask() {
@@ -793,10 +808,14 @@ function addTask() {
   const pomodorosToDo = parseInt(amountOfPomodorosInput.value, 10);
 
   acumulatedPomodoros += pomodorosToDo;
+
   acumulatedPomodorosView.innerText = acumulatedPomodoros;
+
   localStorage.setItem("acumulatedPomodoros", acumulatedPomodoros);
+
   const finishTimestamp = Date.now() + acumulatedPomodoros * getInput(timeInput.value) * 1000;
   const finishTime = new Date(finishTimestamp);
+
   timeOfFinishingWork.innerText = finishTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: is24HourFormat() });
   localStorage.setItem("timeOfFinishingWork", timeOfFinishingWork.innerText);
 
@@ -821,7 +840,6 @@ function addTask() {
 
   taskInput.value = "";
   amountOfPomodorosInput.value = "1";
-  updatePomodoroSummary();
 }
 
 function updatePomodorosCounterPerTask() {
@@ -856,7 +874,6 @@ function taskCompletionCheck() {
       }
     }
   }
-  updatePomodoroSummary();
   saveTasks();
 }
 
@@ -1063,14 +1080,13 @@ inputBtn.addEventListener("click", function () {
     updateTimer(getInput(localStorage.getItem("timeInput")));
   }
 
-  updatePomodoroSummary();
 });
 
 //  Starting the timer
 timeBtnStart.addEventListener("click", function () {
   timeBtnStart.disabled = true;
   if(miniWindow){
-    miniWindow.timeBtnStartMini.style.display = "none";
+    miniWindow.timeBtnStart.style.display = "none";
   }
   if (isWorking) {
     updatePomodorosCounter();
@@ -1113,9 +1129,12 @@ timeBtnFF.addEventListener("click", function () {
   const restDuration = getInput(timeRestInput.value);
   const longRestDuration = getInput(timeLongRestInput.value);
 
+
   progressToCompletion.style.width = "0%";
 
   isRestingLong = updateRestInterval(); // Always update this dynamically
+
+  overrideState = null;
 
   if (isWorking) {
     clearInterval(countdown);
@@ -1167,7 +1186,7 @@ timeBtnFF.addEventListener("click", function () {
       shortBrakeModeBtn.style.backgroundColor = "transparent";
       if(miniWindow){
         miniWindow.preWorking();
-        miniWindow.timeBtnStartMini.style.display = "block"
+        miniWindow.timeBtnStart.style.display = "block"
       }
     }
   }
@@ -1319,7 +1338,7 @@ cancelCreation.addEventListener("click", function () {
   addTaskBtn.style.display = "block";
 });
 
-createTask.addEventListener("click", addTask);
+createTask.addEventListener("click", addTask );
 
 document.addEventListener("click", function (event) {
   if (!addTaskPanel.contains(event.target) && addTaskPanel.style.display === "flex") {
@@ -1332,51 +1351,85 @@ document.addEventListener("click", function (event) {
 
 workModeBtn.addEventListener('click', function(){
   isRestingLong = false;
+  isWorking = true;
+
   shortBrakeModeBtn.style.backgroundColor = "transparent";
   longBrakeModeBtn.style.backgroundColor = "transparent";
+  timeBtnStart.disabled = false;
+
+  clearInterval(countdown)
+  clearInterval(restCountdown);
+  clearInterval(longRestCountdown);
+
   if(isWorking){
-    clearInterval(countdown)
     updateTimer(getInput(timeInput.value))
     preWorking();
     workModeBtn.style.backgroundColor = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
   }else if(!isWorking){
-    clearInterval(restCountdown);
-    clearInterval(longRestCountdown);
     updateTimer(getInput(timeInput.value))
     preWorking();
   }
+
+    localStorage.setItem("countdown", getInput(timeInput.value));
+    localStorage.setItem("longRestCountdown", getInput(timeLongRestInput.value));
+    localStorage.setItem("restCountdown", getInput(timeRestInput.value));
+    localStorage.setItem("isWorking", isWorking);
+    localStorage.setItem("isRestingLong", isRestingLong);
+    saveTasks();
 });
 
 shortBrakeModeBtn.addEventListener('click',function(){
   isRestingLong = false;
+  isWorking = false;
+
   longBrakeModeBtn.style.backgroundColor = "transparent";
   workModeBtn.style.backgroundColor = "transparent";
-  if(isWorking){
-    clearInterval(countdown)
-    updateTimer(getInput(timeRestInput.value))
-    preRestingShort();
-  }else if(!isWorking){
+  timeBtnStart.disabled = false;
+
     clearInterval(restCountdown);
     clearInterval(longRestCountdown);
+    clearInterval(countdown)
+
     updateTimer(getInput(timeRestInput.value))
     preRestingShort();
-  }
+
+  overrideState = true;
+  console.log(overrideState)
+
+    localStorage.setItem("countdown", getInput(timeInput.value));
+    localStorage.setItem("longRestCountdown", getInput(timeLongRestInput.value));
+    localStorage.setItem("restCountdown", getInput(timeRestInput.value));
+    localStorage.setItem("isWorking", isWorking);
+    localStorage.setItem("isRestingLong", isRestingLong);
+    saveTasks();
 });
 
 longBrakeModeBtn.addEventListener('click', function(){
   isRestingLong = true;
+  isWorking = false;
+
   shortBrakeModeBtn.style.backgroundColor = "transparent";
   workModeBtn.style.backgroundColor = "transparent";
-  if(isWorking){
+  timeBtnStart.disabled = false;
+
     clearInterval(countdown)
+    clearInterval(restCountdown);
+    clearInterval(longRestCountdown);
+
+  if(isWorking){
     updateTimer(getInput(timeLongRestInput.value))
     preRestingLong();
   }else if(!isWorking){
-    clearInterval(restCountdown);
-    clearInterval(longRestCountdown);
+
     updateTimer(getInput(timeLongRestInput.value))
     preRestingLong();
   }
+    localStorage.setItem("countdown", getInput(timeInput.value));
+    localStorage.setItem("longRestCountdown", getInput(timeLongRestInput.value));
+    localStorage.setItem("restCountdown", getInput(timeRestInput.value));
+    localStorage.setItem("isWorking", isWorking);
+    localStorage.setItem("isRestingLong", isRestingLong);
+    saveTasks();
 });
 
 tickingVolumeSlider.oninput = function(){
@@ -1406,7 +1459,6 @@ document.addEventListener("click", function (event) {
 clearFinishedTasks.addEventListener("click", function () {
   taskList = taskList.filter(task => !task.isChecked);
   saveTasks();
-  updatePomodoroSummary();
 })
 
 clearAllTasks.addEventListener("click", function () {
@@ -1414,7 +1466,6 @@ clearAllTasks.addEventListener("click", function () {
   saveTasks();
   taskContainer.innerHTML = ""; 
   generalTaskSettingsScreen.style.display = "none";
-  updatePomodoroSummary();
 });
 
 
@@ -1422,8 +1473,12 @@ clearAllTasks.addEventListener("click", function () {
 
 
 window.addEventListener("DOMContentLoaded", () => {
-  pomodorosCounter.innerText = pomodosCounter;
-  let acumulatedPomodoros = Number(localStorage.getItem("acumulatedPomodoros")) || 0;
+  if(pomodosCounter != 0){
+    pomodorosCounter.innerText = pomodosCounter;
+  }else{
+    pomodorosCounter.innerText = 1;
+  }
+  let acumulatedPomodoros = localStorage.getItem("acumulatedPomodoros") || 0;
 
   acumulatedPomodorosDone = parseInt(localStorage.getItem("acumulatedPomodorosDone")) || 0;
   acumulatedPomodorosDoneView.innerText = acumulatedPomodorosDone;
@@ -1496,21 +1551,22 @@ if (isWorking && localStorage.getItem("workingColor")) {
   let durationCountdown = parseInt(localStorage.getItem("countdown")) || 0;
   let restDurationCountdown = parseInt(localStorage.getItem("restCountdown")) || 0;
   let longRestDurationCountdown = parseInt(localStorage.getItem("longRestCountdown")) || 0;
-  isWorking = localStorage.getItem("isWorking") === "true";
-  isRestingLong = updateRestInterval();
-  if (isWorking && durationCountdown < initialTime) {
+  isRestingLong = localStorage.getItem("isRestingLong");
+  if (isWorking && durationCountdown < initialTime && durationCountdown > 0) {
     updateTimer(durationCountdown);
     startWorkTimer(durationCountdown, getInput(timeRestInput.value), getInput(timeLongRestInput.value));
     working();
-  }else if(!isWorking && isRestingLong && longRestDurationCountdown < getInput(timeLongRestInput.value)){
+    console.log(durationCountdown)
+    console.log(initialTime)
+  }else if(!isWorking && isRestingLong && longRestDurationCountdown < getInput(timeLongRestInput.value) && longRestDurationCountdown > 0){
     updateTimer(longRestDurationCountdown);
     startLongRestTimer(getInput(timeInput.value), getInput(timeRestInput.value), longRestDurationCountdown);
     restingLong();
-  }else if(!isWorking && !isRestingLong && restDurationCountdown < getInput(timeRestInput.value)){
+  }else if(!isWorking && !isRestingLong && restDurationCountdown < getInput(timeRestInput.value) && restDurationCountdown > 0){
     updateTimer(restDurationCountdown);
     startRestTimer(getInput(timeInput.value), restDurationCountdown, getInput(timeLongRestInput.value));
     restingShort();
-  }else if(isWorking && durationCountdown){
+  }else if(isWorking){
     updateTimer(initialTime);
     preWorking();
   }else if(!isWorking && isRestingLong && longRestDurationCountdown){
@@ -1520,6 +1576,8 @@ if (isWorking && localStorage.getItem("workingColor")) {
   else if(!isWorking && !isRestingLong && restDurationCountdown){
     updateTimer(restDurationCountdown);
     preRestingShort();
+  }else{
+    countdownDisplay.innerText = getInput(timeInput.value)
   }
   taskList.forEach(renderTask);
 });
