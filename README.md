@@ -16,7 +16,7 @@ A simple and customizable Pomodoro timer built with HTML, CSS, and JavaScript.
 
 ## 🖼️ Screenshots
 
-![Screenshot](screenshot-2025-07-30 171022.jpg)
+![Screenshot](https://github.com/njegosjerinic/pomodoro/blob/main/screenshot-2025-07-30%20171022.jpg)
 
 ---
 
