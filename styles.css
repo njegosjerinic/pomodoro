@@ -1178,6 +1178,8 @@ input:checked + .slider:before {
 
     .controllTime{
         margin: 0;
+        width: 100%;
+        justify-content: center;
     }
 
     .small-window-container{
