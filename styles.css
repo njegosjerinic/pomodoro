@@ -1151,7 +1151,7 @@ input:checked + .slider:before {
     }
 
     #title{
-        width: 90%;
+        width: 100%;
     }
 
     #addTaskBtn{
@@ -1177,13 +1177,19 @@ input:checked + .slider:before {
     }
 
     .controllTime{
-        margin: 0;
-        width: 100%;
-        justify-content: center;
+        margin: 0 0 20px 10%;
+        width: 60%;
+        justify-content: flex-start;
+        display: flex;
+        align-items: center;
     }
 
     .small-window-container{
         display: none;
+    }
+
+    .active{
+            padding: 0px 5px 0 0px;
     }
 }
 

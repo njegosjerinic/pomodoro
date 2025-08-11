@@ -246,6 +246,7 @@
                 window.opener.postMessage({type: "START_TIMER"}, "*");
             }
             window.opener.startingCLick.play();
+            timeBtnStart.disabled = true;
         });
 
         document.getElementById("timeBtnPause").addEventListener("click", function () {

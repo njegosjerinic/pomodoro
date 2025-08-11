@@ -148,7 +148,7 @@ function working() {
   timeBtnFF.style.display = "block";
   timeBtnPause.style.display = "block";
   timeBtnPause.style.color = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
-  taskContainer.style.display = "block";
+  taskContainer.style.display = "flex";
   title.style.display = "flex";
   workModeBtn.style.backgroundColor = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
   estimatedPomodorosContainer.style.display = "flex";
@@ -180,7 +180,7 @@ function preRestingShort() {
   timeBtnFF.style.display = "none";
   timeBtnPause.style.display = "none";
   body.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
-  taskContainer.style.display = "block";
+  taskContainer.style.display = "flex";
   shortBrakeModeBtn.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
   workModeBtn.style.backgroundColor = "transparent";
   estimatedPomodorosContainer.style.display = "flex";
@@ -200,7 +200,7 @@ function restingShort() {
   timeBtnStart.style.color = localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
   timeBtnFF.style.display = "block";
   timeBtnPause.style.display = "block";
-  taskContainer.style.display = "block";
+  taskContainer.style.display = "flex";
   shortBrakeColor.style.backgroundColor = localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
   workModeBtn.style.backgroundColor = "transparent";
   estimatedPomodorosContainer.style.display = "flex";
@@ -222,7 +222,7 @@ function preRestingLong(){
   timeBtnFF.style.display = "none";
   timeBtnPause.style.display = "none";
   body.style.backgroundColor = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
-  taskContainer.style.display = "block";
+  taskContainer.style.display = "flex";
   longBrakeModeBtn.style.backgroundColor = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
   workModeBtn.style.backgroundColor = "transparent";
   estimatedPomodorosContainer.style.display = "flex";
@@ -244,7 +244,7 @@ function restingLong(){
   timeBtnStart.style.color = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
   timeBtnFF.style.display = "block";
   timeBtnPause.style.display = "block";
-  taskContainer.style.display = "block";
+  taskContainer.style.display = "flex";
   longBrakeColor.style.backgroundColor = localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
   workModeBtn.style.backgroundColor = "transparent";
   estimatedPomodorosContainer.style.display = "flex";
@@ -286,7 +286,7 @@ function resumeCountdownWork() {
   isPaused = false;
   timeBtnPause.innerText = "PAUSE";
   localStorage.getItem("workingColor") ? body.style.backgroundColor = localStorage.getItem("workingColor") : body.style.backgroundColor = "rgb(186, 73, 73)";
-  taskContainer.style.display = "block";
+  taskContainer.style.display = "flex";
   title.style.display = "flex";
   if(darkModeCheck.checked){
     timeBtnPause.style.background = "transparent";
@@ -303,7 +303,7 @@ function resumeCountdownWork() {
   timerBackground.style.background = "rgba(255, 255, 255, 0.1)";
   timeBtnPause.style.background = "white";
   timeBtnPause.style.color = localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
-  timeBtnPause.style.boxShadow = " 0px 0px 0px"
+  timeBtnPause.style.boxShadow = " 0px 0px 0px";
 }
 
 function pauseCountdownRestingShort() {
@@ -328,7 +328,7 @@ function pauseCountdownRestingShort() {
 function resumeCountdownRestingShort() {
   isPaused = false;
   timeBtnPause.innerText = "PAUSE";
-  taskContainer.style.display = "block";
+  taskContainer.style.display = "flex";
   title.style.display = "flex";
   estimatedPomodorosContainer.style.display = "flex";
   addTaskBtn.style.display = "block";
@@ -366,7 +366,7 @@ function pauseCountdownRestingLong() {
 function resumeCountdownRestingLong() {
   isPaused = false;
   timeBtnPause.innerText = "PAUSE";
-  taskContainer.style.display = "block";
+  taskContainer.style.display = "flex";
   title.style.display = "flex";
   estimatedPomodorosContainer.style.display = "flex";
   addTaskBtn.style.display = "block";

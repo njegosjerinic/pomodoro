@@ -22,15 +22,15 @@
                 <div class="inputs-container">
                     <div class="input-box">
                         <p>Pomodoro</p>
-                        <input type="number" id="timeInput" value="30">
+                        <input type="number" id="timeInput" value="30" min="1" max="60">
                     </div>
                     <div class="input-box">
                         <p>Break</p>
-                        <input type="number" id="timeRestInput" value="10">
+                        <input type="number" id="timeRestInput" value="10" min="1" max="60">
                     </div>
                     <div class="input-box">
                         <p>Long Break</p>
-                        <input type="number" id="longBreakTimeInput" value="25">
+                        <input type="number" id="longBreakTimeInput" value="25" min="1" max="60">
                     </div>
                 </div>
                 <div class="timer-toggles">
@@ -50,7 +50,7 @@
                     </div>
                     <div class="long-break-interval">
                         <strong>Long Break Intervals</strong>
-                        <input type="number" value="4" id="longBreakIntervalInput">
+                        <input type="number" value="4" id="longBreakIntervalInput" min="1" max="10">
                     </div>
                 </div>
             </div>
@@ -90,7 +90,7 @@
                         </div>
                         <div class="repeat-alarm-container">
                             <span>repeat</span>
-                            <input type="number" class="repeat-alarm" value="1" id="repeatAlarmInput">
+                            <input type="number" class="repeat-alarm" value="1" id="repeatAlarmInput" min="1" max="10">
                         </div>
                     </div>
                 </div>
