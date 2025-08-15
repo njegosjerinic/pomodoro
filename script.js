@@ -711,7 +711,7 @@ function renderTask(task) {
 
   taskModPanel.append(taskModInputPanel,buttonsForManipulationDiv);
   taskModPanel.style.display = "none";
-  taskModPanel.style.width = "100%";
+  taskModPanel.style.width = "102%";
   taskModPanel.style.height = "100%";
   taskModPanel.style.flexDirection = "column";
   taskModPanel.style.justifyContent = "space-between";
