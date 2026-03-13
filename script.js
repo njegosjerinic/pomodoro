@@ -105,20 +105,21 @@ const startingCLick = new Audio("clickingStart.wav");
 
 // --- App State ---
 const state = {
-  countdown: null,
-  restCountdown: null,
-  longRestCountdown: null,
-  mode: null,
-  status: null,
+  workTimer: parseInt(localStorage.getItem("timeInput")) || 25,
+  restTimer: parseInt(localStorage.getItem("timeRestInput")) || 10,
+  longRestTimer: parseInt(localStorage.getItem("timeLongRestInput")) || 25,
+  timeRemaning: 0,
+  status: "working",
   numberOfTasks: 0,
   pomodosCounter: parseInt(sessionStorage.getItem("allPomodorosCounter")) || 0,
   taskList: JSON.parse(localStorage.getItem("tasks")) || [],
-  baseWorkingTimer: 30,
   colorSelectorMode: null,
   acumulatedPomodoros: 0,
   acumulatedPomodorosDone: 0,
   overrideState: null,
 };
+
+console.log(state);
 
 //==============UTILITIES==================//
 //This takes input that has been translated to seconds and translates it back to minutes and seconds
@@ -146,7 +147,7 @@ function getInput(input) {
 
 //These are the states of the timer in the app
 function preWorking() {
-  state.isWorking = true;
+  state.status = "working";
   DOM.body.style.backgroundColor =
     localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
   DOM.buttons.timeBtnStart.style.display = "block";
@@ -160,7 +161,7 @@ function preWorking() {
 }
 
 function working() {
-  state.isWorking = true;
+  state.status = "working";
   DOM.body.style.backgroundColor =
     localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
   DOM.buttons.timeBtnStart.style.display = "none";
@@ -178,7 +179,7 @@ function working() {
 }
 
 function showWorkDarkModeUI() {
-  state.isWorking = true;
+  state.status = "working";
   DOM.body.style.backgroundColor = "black";
   DOM.buttons.timeBtnStart.style.display = "none";
   DOM.buttons.timeBtnFF.style.display = "block";
@@ -196,7 +197,7 @@ function showWorkDarkModeUI() {
 }
 
 function preRestingShort() {
-  state.isWorking = false;
+  state.status = "resting";
   DOM.buttons.timeBtnStart.style.display = "block";
   DOM.buttons.timeBtnStart.style.color =
     localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
@@ -220,7 +221,7 @@ function preRestingShort() {
 }
 
 function restingShort() {
-  state.isWorking = false;
+  state.status = "resting";
   DOM.body.style.backgroundColor =
     localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
   DOM.buttons.timeBtnStart.style.display = "none";
@@ -246,7 +247,7 @@ function restingShort() {
 }
 
 function preRestingLong() {
-  state.isWorking = false;
+  state.status = "resting";
   state.isRestingLong = true;
   DOM.buttons.timeBtnStart.style.display = "block";
   DOM.buttons.timeBtnStart.style.color =
@@ -273,7 +274,7 @@ function preRestingLong() {
 }
 
 function restingLong() {
-  state.isWorking = false;
+  state.status = "resting";
   state.isRestingLong = true;
   DOM.body.style.backgroundColor =
     localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
@@ -301,7 +302,7 @@ function restingLong() {
 
 //States that have to do with pausing
 function pauseCountdownWork() {
-  state.isPaused = true;
+  state.status = "paused";
   DOM.buttons.timeBtnPause.innerText = "START";
   localStorage.getItem("workingColor")
     ? (DOM.body.style.backgroundColor = localStorage.getItem("workingColor"))
@@ -327,7 +328,7 @@ function pauseCountdownWork() {
 }
 
 function resumeCountdownWork() {
-  state.isPaused = false;
+  state.status = "working";
   DOM.buttons.timeBtnPause.innerText = "PAUSE";
   localStorage.getItem("workingColor")
     ? (DOM.body.style.backgroundColor = localStorage.getItem("workingColor"))
@@ -446,75 +447,42 @@ function updateRestInterval() {
 
 //Spliting the timer function into workTimer(), restTimer() and longRestTimer()
 
-window.startWorkTimer = function (duration, restDuration, longRestDuration) {
+function startTimer(duration) {
   DOM.buttons.timeBtnPause.innerText = "PAUSE";
   updateTimer(duration);
-  state.countdown = setInterval(function () {
-    if (!state.isPaused) {
+  state.timeRemaning = setInterval(function () {
+    if (state.status != "paused") {
       duration--;
       updateTimer(duration);
-      DOM.checkboxes.darkModeCheck.checked ? showWorkDarkModeUI() : working();
       tickingSoundMod();
       progressBarUpdate(duration, getInput(DOM.input.timeInput.value));
       localStorage.setItem("countdown", duration);
-      localStorage.setItem("isWorking", state.isWorking);
     }
 
-    if (duration == 0 && DOM.checkboxes.autoStartBreaksCheck.checked) {
+    if (duration == 0) {
       alarmSoundSelector();
-      clearInterval(state.countdown);
-      state.isWorking = false;
-      DOM.buttons.workModeBtn.style.backgroundColor = "transparent";
-      if (updateRestInterval()) {
-        preRestingLong();
-        updateTimer(longRestDuration);
-        startLongRestTimer(
-          getInput(DOM.input.timeInput.value),
-          getInput(DOM.input.timeRestInput.value),
-          getInput(DOM.input.timeLongRestInput.value),
-        );
-        if (miniWindow) {
-          miniWindow.preRestingLong();
+      clearInterval(state.duration);
+      state.status = "resting";
+      if (DOM.checkboxes.autoStartBreaksCheck.checked) {
+        DOM.buttons.workModeBtn.style.backgroundColor = "transparent";
+        if (updateRestInterval()) {
+          preRestingLong();
+          updateTimer(state.longRestTimer);
+          startTimer(state.longRestTimer);
+          DOM.buttons.timeBtnStart.disabled = false;
+        } else {
+          preRestingShort();
+          updateTimer(state.restTimer);
+          startRestTimer(state.restTimer);
+          DOM.buttons.timeBtnStart.disabled = false;
         }
-
-        DOM.buttons.timeBtnStart.disabled = false;
-      } else {
-        preRestingShort();
-        updateTimer(restDuration);
-        startRestTimer(
-          getInput(DOM.input.timeInput.value),
-          getInput(DOM.input.timeRestInput.value),
-          getInput(DOM.input.timeLongRestInput.value),
-        );
-        if (miniWindow) {
-          miniWindow.preRestingShort();
-        }
-        DOM.buttons.timeBtnStart.disabled = false;
+        DOM.progressToCompletion.style.width = "0%";
       }
-      DOM.progressToCompletion.style.width = "0%";
-    } else if (duration == 0) {
-      alarmSoundSelector();
-      clearInterval(state.countdown);
-      state.isWorking = false;
-      if (updateRestInterval()) {
-        preRestingLong();
-        updateTimer(longRestDuration);
-        if (miniWindow) {
-          miniWindow.preRestingLong();
-        }
-        DOM.buttons.timeBtnStart.disabled = false;
-      } else {
-        preRestingShort();
-        updateTimer(restDuration);
-        if (miniWindow) {
-          miniWindow.preRestingShort();
-        }
-        DOM.buttons.timeBtnStart.disabled = false;
-      }
-      DOM.progressToCompletion.style.width = "0%";
     }
   }, 1000);
-};
+}
+
+window.startWorkTimer = function (duration, restDuration, longRestDuration) {};
 
 window.startRestTimer = startRestTimer;
 
@@ -1229,6 +1197,7 @@ DOM.buttons.timeBtnStart.addEventListener("click", function () {
       getInput(DOM.input.timeRestInput.value),
       getInput(DOM.input.timeLongRestInput.value),
     );
+    DOM.checkboxes.darkModeCheck.checked ? showWorkDarkModeUI() : working();
     updatePomodorosCounterPerTask();
   } else if (updateRestInterval() || state.isRestingLong) {
     startLongRestTimer(
