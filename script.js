@@ -105,10 +105,13 @@ const startingCLick = new Audio("clickingStart.wav");
 
 // --- App State ---
 const state = {
-  workTimer: parseInt(localStorage.getItem("timeInput")) || 25,
-  restTimer: parseInt(localStorage.getItem("timeRestInput")) || 10,
-  longRestTimer: parseInt(localStorage.getItem("timeLongRestInput")) || 25,
-  timeRemaning: 0,
+  workTime: parseInt(localStorage.getItem("timeInput")) || 25,
+  restTime: parseInt(localStorage.getItem("timeRestInput")) || 10,
+  longRestTime: parseInt(localStorage.getItem("timeLongRestInput")) || 25,
+  isRestingLong: false,
+  timeRemaining: 1500,
+  isPaused: false,
+  timerId: null,
   status: "working",
   numberOfTasks: 0,
   pomodosCounter: parseInt(sessionStorage.getItem("allPomodorosCounter")) || 0,
@@ -147,7 +150,6 @@ function getInput(input) {
 
 //These are the states of the timer in the app
 function preWorking() {
-  state.status = "working";
   DOM.body.style.backgroundColor =
     localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
   DOM.buttons.timeBtnStart.style.display = "block";
@@ -161,7 +163,6 @@ function preWorking() {
 }
 
 function working() {
-  state.status = "working";
   DOM.body.style.backgroundColor =
     localStorage.getItem("workingColor") || "rgb(186, 73, 73)";
   DOM.buttons.timeBtnStart.style.display = "none";
@@ -179,7 +180,6 @@ function working() {
 }
 
 function showWorkDarkModeUI() {
-  state.status = "working";
   DOM.body.style.backgroundColor = "black";
   DOM.buttons.timeBtnStart.style.display = "none";
   DOM.buttons.timeBtnFF.style.display = "block";
@@ -197,7 +197,6 @@ function showWorkDarkModeUI() {
 }
 
 function preRestingShort() {
-  state.status = "resting";
   DOM.buttons.timeBtnStart.style.display = "block";
   DOM.buttons.timeBtnStart.style.color =
     localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
@@ -221,7 +220,6 @@ function preRestingShort() {
 }
 
 function restingShort() {
-  state.status = "resting";
   DOM.body.style.backgroundColor =
     localStorage.getItem("shortBrakeColor") || "rgb(56, 133, 138)";
   DOM.buttons.timeBtnStart.style.display = "none";
@@ -247,8 +245,6 @@ function restingShort() {
 }
 
 function preRestingLong() {
-  state.status = "resting";
-  state.isRestingLong = true;
   DOM.buttons.timeBtnStart.style.display = "block";
   DOM.buttons.timeBtnStart.style.color =
     localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
@@ -274,8 +270,6 @@ function preRestingLong() {
 }
 
 function restingLong() {
-  state.status = "resting";
-  state.isRestingLong = true;
   DOM.body.style.backgroundColor =
     localStorage.getItem("longBrakeColor") || "rgb(57, 112, 151)";
   DOM.buttons.timeBtnStart.style.display = "none";
@@ -302,7 +296,6 @@ function restingLong() {
 
 //States that have to do with pausing
 function pauseCountdownWork() {
-  state.status = "paused";
   DOM.buttons.timeBtnPause.innerText = "START";
   localStorage.getItem("workingColor")
     ? (DOM.body.style.backgroundColor = localStorage.getItem("workingColor"))
@@ -328,7 +321,6 @@ function pauseCountdownWork() {
 }
 
 function resumeCountdownWork() {
-  state.status = "working";
   DOM.buttons.timeBtnPause.innerText = "PAUSE";
   localStorage.getItem("workingColor")
     ? (DOM.body.style.backgroundColor = localStorage.getItem("workingColor"))
@@ -357,7 +349,6 @@ function resumeCountdownWork() {
 }
 
 function pauseCountdownRestingShort() {
-  state.isPaused = true;
   DOM.buttons.timeBtnPause.innerText = "START";
   DOM.taskContainer.style.display = "flex";
   DOM.title.style.display = "flex";
@@ -377,7 +368,6 @@ function pauseCountdownRestingShort() {
 }
 
 function resumeCountdownRestingShort() {
-  state.isPaused = false;
   DOM.buttons.timeBtnPause.innerText = "PAUSE";
   DOM.taskContainer.style.display = "flex";
   DOM.title.style.display = "flex";
@@ -395,7 +385,6 @@ function resumeCountdownRestingShort() {
 }
 
 function pauseCountdownRestingLong() {
-  state.isPaused = true;
   DOM.buttons.timeBtnPause.innerText = "START";
   DOM.taskContainer.style.display = "flex";
   DOM.title.style.display = "flex";
@@ -416,7 +405,6 @@ function pauseCountdownRestingLong() {
 }
 
 function resumeCountdownRestingLong() {
-  state.isPaused = false;
   DOM.buttons.timeBtnPause.innerText = "PAUSE";
   DOM.taskContainer.style.display = "flex";
   DOM.title.style.display = "flex";
@@ -445,128 +433,33 @@ function updateRestInterval() {
   }
 }
 
+function switchState() {
+  if (state.status === "working") {
+    state.status = "resting";
+    state.timeRemaining = getInput(state.restTime);
+  } else {
+    state.status = "working";
+    state.timeRemaining = getInput(state.workTime);
+  }
+}
+
+function tick() {
+  state.timeRemaining--;
+  updateTimer(state.timeRemaining);
+
+  if (state.timeRemaining <= 0) {
+    switchState();
+  }
+}
+
 //Spliting the timer function into workTimer(), restTimer() and longRestTimer()
 
 function startTimer(duration) {
   DOM.buttons.timeBtnPause.innerText = "PAUSE";
+  clearInterval(state.timerId);
   updateTimer(duration);
-  state.timeRemaning = setInterval(function () {
-    if (state.status != "paused") {
-      duration--;
-      updateTimer(duration);
-      tickingSoundMod();
-      progressBarUpdate(duration, getInput(DOM.input.timeInput.value));
-      localStorage.setItem("countdown", duration);
-    }
-
-    if (duration == 0) {
-      alarmSoundSelector();
-      clearInterval(state.duration);
-      state.status = "resting";
-      if (DOM.checkboxes.autoStartBreaksCheck.checked) {
-        DOM.buttons.workModeBtn.style.backgroundColor = "transparent";
-        if (updateRestInterval()) {
-          preRestingLong();
-          updateTimer(state.longRestTimer);
-          startTimer(state.longRestTimer);
-          DOM.buttons.timeBtnStart.disabled = false;
-        } else {
-          preRestingShort();
-          updateTimer(state.restTimer);
-          startRestTimer(state.restTimer);
-          DOM.buttons.timeBtnStart.disabled = false;
-        }
-        DOM.progressToCompletion.style.width = "0%";
-      }
-    }
-  }, 1000);
-}
-
-window.startWorkTimer = function (duration, restDuration, longRestDuration) {};
-
-window.startRestTimer = startRestTimer;
-
-function startRestTimer(duration, restDuration, longRestDuration) {
-  state.restCountdown = setInterval(function () {
-    if (!state.isPaused) {
-      restDuration--;
-      restingShort();
-      updateTimer(restDuration);
-      progressBarUpdate(restDuration, getInput(DOM.input.timeRestInput.value));
-      localStorage.setItem("restCountdown", state.restDuration);
-      localStorage.setItem("isWorking", state.isWorking);
-    }
-
-    if (restDuration == 0 && DOM.checkboxes.autoStartPomodorosCheck.checked) {
-      alarmSoundSelector();
-      clearInterval(state.restCountdown);
-      state.isWorking = true;
-      preWorking();
-      updateTimer(duration);
-      state.overrideState = null;
-      if (miniWindow) {
-        miniWindow.preWorking();
-      }
-      startWorkTimer(
-        getInput(DOM.input.timeInput.value),
-        getInput(DOM.input.timeRestInput.value),
-        getInput(DOM.input.timeLongRestInput.value),
-      );
-      updatePomodorosCounter();
-      DOM.buttons.shortBrakeModeBtn.style.backgroundColor = "transparent";
-      DOM.buttons.workModeBtn.style.backgroundColor = "transparent";
-      DOM.progressToCompletion.style.width = "0%";
-      DOM.buttons.timeBtnStart.disabled = false;
-    } else if (restDuration == 0) {
-      alarmSoundSelector();
-      clearInterval(state.restCountdown);
-      state.isWorking = true;
-      preWorking();
-      updateTimer(duration);
-      if (miniWindow) {
-        miniWindow.preWorking();
-      }
-      DOM.progressToCompletion.style.width = "0%";
-      DOM.buttons.shortBrakeModeBtn.style.backgroundColor = "transparent";
-      DOM.buttons.timeBtnStart.disabled = false;
-    }
-  }, 1000);
-}
-
-window.startLongRestTimer = startLongRestTimer;
-
-function startLongRestTimer(duration, restDuration, longRestDuration) {
-  state.longRestCountdown = setInterval(function () {
-    if (!state.isPaused) {
-      longRestDuration--;
-      restingLong();
-      updateTimer(longRestDuration);
-      if (miniWindow) {
-        miniWindow.restingLong();
-      }
-      progressBarUpdate(
-        longRestDuration,
-        getInput(DOM.input.timeLongRestInput.value),
-      );
-      localStorage.setItem("longRestCountdown", longRestDuration);
-      localStorage.setItem("isWorking", state.isWorking);
-    }
-
-    if (longRestDuration == 0) {
-      alarmSoundSelector();
-      clearInterval(longRestCountdown);
-      state.isWorking = true;
-      preWorking();
-      updateTimer(duration);
-      if (miniWindow) {
-        miniWindow.preWorking();
-      }
-      DOM.progressToCompletion.style.width = "0%";
-      DOM.buttons.longBrakeModeBtn.style.backgroundColor = "transparent";
-      DOM.buttons.shortBrakeModeBtn.style.backgroundColor = "transparent";
-      DOM.buttons.timeBtnStart.disabled = false;
-    }
-  }, 1000);
+  state.timeRemaining = duration;
+  state.timerId = setInterval(tick, 1000);
 }
 
 function updateTimer(time) {
@@ -1050,10 +943,6 @@ function clickStartButton() {
   DOM.buttons.timeBtnStart.style.boxShadow = "0px 0px 0px";
 }
 
-window.startMainTimer = function () {
-  DOM.buttons.timeBtnStart.click();
-};
-
 //================================================================EVENT LISTENERS============================================================//
 let miniWindow = null;
 
@@ -1187,196 +1076,69 @@ DOM.buttons.inputBtn.addEventListener("click", function () {
 //  Starting the timer
 DOM.buttons.timeBtnStart.addEventListener("click", function () {
   DOM.buttons.timeBtnStart.disabled = true;
+  console.log(state);
   if (miniWindow) {
     miniWindow.DOM.buttons.timeBtnStart.style.display = "none";
   }
-  if (state.isWorking) {
+  if (state.status === "working") {
     updatePomodorosCounter();
-    startWorkTimer(
-      getInput(DOM.input.timeInput.value),
-      getInput(DOM.input.timeRestInput.value),
-      getInput(DOM.input.timeLongRestInput.value),
-    );
+    startTimer(getInput(state.workTime));
     DOM.checkboxes.darkModeCheck.checked ? showWorkDarkModeUI() : working();
     updatePomodorosCounterPerTask();
   } else if (updateRestInterval() || state.isRestingLong) {
-    startLongRestTimer(
-      getInput(DOM.input.timeInput.value),
-      getInput(DOM.input.timeRestInput.value),
-      getInput(DOM.input.timeLongRestInput.value),
-    );
+    startTimer(getInput(state.longRestTime));
     taskCompletionCheck();
     updatePomodorosCounterPerTask();
   } else {
-    startRestTimer(
-      getInput(DOM.input.timeInput.value),
-      getInput(DOM.input.timeRestInput.value),
-      getInput(DOM.input.timeLongRestInput.value),
-    );
+    startTimer(getInput(state.restTime));
     taskCompletionCheck();
     updatePomodorosCounterPerTask();
   }
   startingCLick.play();
 });
 
-window.addEventListener("message", (event) => {
-  if (event.data?.type === "START_TIMER") {
-    DOM.buttons.timeBtnStart.disabled = true;
-    if (state.isWorking) {
-      updatePomodorosCounter();
-      startWorkTimer(
-        getInput(DOM.input.timeInput.value),
-        getInput(DOM.input.timeRestInput.value),
-        getInput(DOM.input.timeLongRestInput.value),
-      );
-      updatePomodorosCounterPerTask();
-    } else if (updateRestInterval() || state.isRestingLong) {
-      startLongRestTimer(
-        getInput(DOM.input.timeInput.value),
-        getInput(DOM.input.timeRestInput.value),
-        getInput(DOM.input.timeLongRestInput.value),
-      );
-      taskCompletionCheck();
-      updatePomodorosCounterPerTask();
-    } else {
-      startRestTimer(
-        getInput(DOM.input.timeInput.value),
-        getInput(DOM.input.timeRestInput.value),
-        getInput(DOM.input.timeLongRestInput.value),
-      );
-      taskCompletionCheck();
-      updatePomodorosCounterPerTask();
-    }
-  }
-});
-
 //  Actions that the Fast Foward button does
 DOM.buttons.timeBtnFF.addEventListener("click", function () {
-  const duration = getInput(DOM.input.timeInput.value);
-  const restDuration = getInput(DOM.input.timeRestInput.value);
-  const longRestDuration = getInput(DOM.input.timeLongRestInput.value);
-
   DOM.progressToCompletion.style.width = "0%";
-
+  clearInterval(state.timerId);
   state.isRestingLong = updateRestInterval(); // Always update this dynamically
 
   state.overrideState = null;
 
-  if (state.isWorking) {
-    clearInterval(state.countdown);
-    localStorage.setItem("countdown", duration);
-    state.isWorking = false;
-    localStorage.setItem("isWorking", state.isWorking);
+  if ((state.status = "working")) {
+    state.status = "resting";
 
     if (state.isRestingLong) {
-      updateTimer(longRestDuration);
-      localStorage.setItem("longRestCountdown", longRestDuration);
+      updateTimer(getInput(state.longRestTime));
       preRestingLong();
       DOM.buttons.workModeBtn.style.backgroundColor = "transparent";
-      if (miniWindow) {
-        miniWindow.preRestingLong();
-        miniWindow.timeBtnStartMini.style.display = "block";
-      }
     } else {
-      updateTimer(restDuration);
-      localStorage.setItem("restCountdown", restDuration);
+      updateTimer(getInput(state.restTime));
       preRestingShort();
-      if (miniWindow) {
-        miniWindow.preRestingShort();
-        miniWindow.timeBtnStartMini.style.display = "block";
-      }
     }
   } else {
-    if (state.isRestingLong) {
-      clearInterval(state.longRestCountdown);
-      updateTimer(duration);
-      localStorage.setItem("countdown", duration);
-      preWorking();
-      state.isWorking = true;
-      state.isRestingLong = false;
-      localStorage.setItem("isWorking", state.isWorking);
-      localStorage.setItem("isRestingLong", state.isRestingLong);
-      DOM.buttons.longBrakeModeBtn.style.backgroundColor = "transparent";
-      if (miniWindow) {
-        miniWindow.preWorking();
-        miniWindow.timeBtnStartMini.style.display = "block";
-      }
-    } else {
-      clearInterval(state.restCountdown);
-      updateTimer(duration);
-      localStorage.setItem("countdown", duration);
-      preWorking();
-      state.isWorking = true;
-      localStorage.setItem("isWorking", state.isWorking);
-      DOM.buttons.shortBrakeModeBtn.style.backgroundColor = "transparent";
-      if (miniWindow) {
-        miniWindow.preWorking();
-        miniWindow.DOM.buttons.timeBtnStart.style.display = "block";
-      }
+    updateTimer(getInput(state.workTime));
+    localStorage.setItem("countdown", state.workTime);
+    preWorking();
+    state.status = "working";
+    state.isRestingLong = false;
+    localStorage.setItem("isRestingLong", state.isRestingLong);
+    DOM.buttons.longBrakeModeBtn.style.backgroundColor = "transparent";
+    if (miniWindow) {
+      miniWindow.preWorking();
+      miniWindow.timeBtnStartMini.style.display = "block";
     }
   }
+
   DOM.buttons.timeBtnStart.disabled = false;
   DOM.buttons.timeBtnStart.style.boxShadow = "rgb(235, 235, 235) 0px 6px 0px";
   saveTasks();
 });
 
-window.addEventListener("message", (event) => {
-  if (event.data.type === "FAST_FOWARD") {
-    const duration = getInput(DOM.input.timeInput.value);
-    const restDuration = getInput(DOM.input.timeRestInput.value);
-    const longRestDuration = getInput(DOM.input.timeLongRestInput.value);
-
-    DOM.progressToCompletion.style.width = "0%";
-
-    state.isRestingLong = updateRestInterval(); // Always update this dynamically
-
-    if (state.isWorking) {
-      clearInterval(state.countdown);
-      localStorage.setItem("countdown", duration);
-      state.isWorking = false;
-      localStorage.setItem("isWorking", state.isWorking);
-
-      if (state.isRestingLong) {
-        updateTimer(longRestDuration);
-        localStorage.setItem("longRestCountdown", longRestDuration);
-        preRestingLong();
-        DOM.buttons.workModeBtn.style.backgroundColor = "transparent";
-      } else {
-        updateTimer(restDuration);
-        localStorage.setItem("restCountdown", restDuration);
-        preRestingShort();
-      }
-    } else {
-      if (state.isRestingLong) {
-        clearInterval(state.longRestCountdown);
-        updateTimer(duration);
-        localStorage.setItem("countdown", duration);
-        preWorking();
-        state.isWorking = true;
-        state.isRestingLong = false;
-        localStorage.setItem("isWorking", state.isWorking);
-        localStorage.setItem("isRestingLong", state.isRestingLong);
-        DOM.buttons.longBrakeModeBtn.style.backgroundColor = "transparent";
-      } else {
-        clearInterval(state.restCountdown);
-        updateTimer(duration);
-        localStorage.setItem("countdown", duration);
-        preWorking();
-        state.isWorking = true;
-        localStorage.setItem("isWorking", state.isWorking);
-        DOM.buttons.shortBrakeModeBtn.style.backgroundColor = "transparent";
-      }
-    }
-    DOM.buttons.timeBtnStart.disabled = false;
-    DOM.buttons.timeBtnStart.style.boxShadow = "rgb(235, 235, 235) 0px 6px 0px";
-    saveTasks();
-  }
-});
-
 //  Code for pausing
 
 DOM.buttons.timeBtnPause.addEventListener("click", function () {
-  if (state.isWorking) {
+  if (state.status === "working") {
     if (state.isPaused) {
       resumeCountdownWork();
       if (miniWindow) {
@@ -1713,65 +1475,6 @@ window.addEventListener("DOMContentLoaded", () => {
   let longRestDurationCountdown =
     parseInt(localStorage.getItem("longRestCountdown")) || 0;
   state.isRestingLong = localStorage.getItem("isRestingLong");
-  if (
-    state.isWorking &&
-    durationCountdown < initialTime &&
-    durationCountdown > 0
-  ) {
-    updateTimer(durationCountdown);
-    startWorkTimer(
-      durationCountdown,
-      getInput(DOM.input.timeRestInput.value),
-      getInput(DOM.input.timeLongRestInput.value),
-    );
-    working();
-    console.log(durationCountdown);
-    console.log(initialTime);
-  } else if (
-    !state.isWorking &&
-    state.isRestingLong &&
-    longRestDurationCountdown < getInput(DOM.input.timeLongRestInput.value) &&
-    longRestDurationCountdown > 0
-  ) {
-    updateTimer(longRestDurationCountdown);
-    startLongRestTimer(
-      getInput(DOM.input.timeInput.value),
-      getInput(DOM.input.timeRestInput.value),
-      longRestDurationCountdown,
-    );
-    restingLong();
-  } else if (
-    !state.isWorking &&
-    !state.isRestingLong &&
-    restDurationCountdown < getInput(DOM.input.timeRestInput.value) &&
-    restDurationCountdown > 0
-  ) {
-    updateTimer(restDurationCountdown);
-    startRestTimer(
-      getInput(DOM.input.timeInput.value),
-      restDurationCountdown,
-      getInput(DOM.input.timeLongRestInput.value),
-    );
-    restingShort();
-  } else if (state.isWorking) {
-    updateTimer(initialTime);
-    preWorking();
-  } else if (
-    !state.isWorking &&
-    state.isRestingLong &&
-    longRestDurationCountdown
-  ) {
-    updateTimer(longRestDurationCountdown);
-    preRestingLong();
-  } else if (
-    !state.isWorking &&
-    !state.isRestingLong &&
-    restDurationCountdown
-  ) {
-    updateTimer(restDurationCountdown);
-    preRestingShort();
-  } else {
-    DOM.countdownDisplay.innerText = getInput(DOM.input.timeInput.value);
-  }
+
   state.taskList.forEach(renderTask);
 });
